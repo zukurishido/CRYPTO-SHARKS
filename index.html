@@ -4,111 +4,101 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypto Sharks - Приват Клуб</title>
-    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Фоновые эффекты -->
-    <div class="gradient-bg">
-        <div class="crypto-particles"></div>
-    </div>
-
+    <!-- Фоновый градиент -->
+    <div class="gradient-overlay"></div>
+    
     <div class="app-container">
         <!-- Шапка -->
         <header class="header">
-            <div class="brand-container">
-                <div class="logo-wrapper">
-                    <svg class="shark-logo" viewBox="0 0 100 60">
-                        <!-- Основное тело акулы -->
-                        <path class="shark-body" d="M10,30 C20,10 40,5 50,5 C60,5 80,10 90,30 C80,50 60,55 50,55 C40,55 20,50 10,30"/>
-                        <!-- Плавник -->
-                        <path class="shark-fin" d="M45,5 L50,-5 L55,5"/>
-                        <!-- Хвост -->
-                        <path class="shark-tail" d="M85,30 L95,20 L95,40 Z"/>
-                        <!-- Глаз -->
-                        <circle class="shark-eye" cx="30" cy="25" r="2"/>
-                        <!-- Жабры -->
-                        <g class="shark-gills">
-                            <line x1="35" y1="25" x2="40" y2="25"/>
-                            <line x1="35" y1="30" x2="40" y2="30"/>
-                            <line x1="35" y1="35" x2="40" y2="35"/>
-                        </g>
-                    </svg>
-                </div>
-                <h1 class="brand-text">CRYPTO SHARKS</h1>
+            <div class="logo-section">
+                <svg class="shark-icon" viewBox="0 0 100 100">
+                    <path class="shark-outline" d="M30 50 C30 35, 45 25, 60 25 S90 35, 90 50 S75 75, 60 75 S30 65, 30 50Z" />
+                    <path class="shark-fin" d="M60 25 L70 15 L80 25" />
+                    <ellipse class="shark-eye" cx="45" cy="45" rx="3" ry="3" />
+                </svg>
+                <h1 class="brand-name">CRYPTO SHARKS</h1>
             </div>
-            <div class="private-badge">ПРИВАТ КЛУБ</div>
+            <div class="privat-badge">ПРИВАТ КЛУБ</div>
         </header>
 
-        <!-- Статистика -->
-        <main class="main-content">
-            <div class="period-info">
-                <h2>Статистика Приватки 01.09.24-01.10.24</h2>
-            </div>
+        <!-- Заголовок периода -->
+        <div class="period-header">
+            <h2>Статистика Приватки 01.09.24-01.10.24</h2>
+        </div>
 
-            <!-- Навигация -->
-            <nav class="trading-nav">
-                <button class="nav-btn active" data-tab="futures">
-                    <span class="nav-icon">📈</span>
-                    FUTURES
-                </button>
-                <button class="nav-btn" data-tab="spot">
-                    <span class="nav-icon">💎</span>
-                    SPOT
-                </button>
-                <button class="nav-btn" data-tab="defi">
-                    <span class="nav-icon">🚀</span>
-                    DEFI
-                </button>
-            </nav>
+        <!-- Навигация -->
+        <nav class="trading-tabs">
+            <button class="tab-btn active" data-tab="futures">
+                <span class="tab-icon">📈</span>
+                <span>FUTURES</span>
+            </button>
+            <button class="tab-btn" data-tab="spot">
+                <span class="tab-icon">💎</span>
+                <span>SPOT</span>
+            </button>
+            <button class="tab-btn" data-tab="defi">
+                <span class="tab-icon">🚀</span>
+                <span>DEFI</span>
+            </button>
+        </nav>
 
-            <!-- Контент табов -->
-            <div class="tab-container">
-                <!-- FUTURES -->
-                <div id="futures" class="tab-content active">
-                    <div class="stats-summary">
-                        <div class="stat-card">
-                            <h3>Всего сделок</h3>
-                            <div class="stat-value" data-value="3">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Сделок в Б/У</h3>
-                            <div class="stat-value" data-value="1">0</div>
-                        </div>
-                        <div class="stat-card negative">
-                            <h3>По стопу</h3>
-                            <div class="stat-value" data-value="1">-20%</div>
-                        </div>
-                        <div class="stat-card positive">
-                            <h3>Прибыльных</h3>
-                            <div class="stat-value" data-value="1">+48%</div>
-                        </div>
+        <!-- Контент -->
+        <main class="content-section">
+            <!-- FUTURES -->
+            <section id="futures" class="tab-content active">
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <h3>Всего сделок</h3>
+                        <div class="value">3</div>
                     </div>
-
-                    <div class="trades-list">
-                        <div class="trade-item positive">
-                            <span class="coin-name">#BLZ</span>
-                            <span class="leverage">20x</span>
-                            <span class="result">+48.26%</span>
-                        </div>
-                        <div class="trade-item negative">
-                            <span class="coin-name">#TIA</span>
-                            <span class="leverage">10x</span>
-                            <span class="result">-20%</span>
-                        </div>
-                        <div class="trade-item neutral">
-                            <span class="coin-name">#ATOM</span>
-                            <span class="leverage">15x</span>
-                            <span class="result">б/у</span>
-                        </div>
+                    <div class="stat-box">
+                        <h3>Сделок в Б/У</h3>
+                        <div class="value">1</div>
+                    </div>
+                    <div class="stat-box negative">
+                        <h3>Сделок по стопу</h3>
+                        <div class="value">1 (-20%)</div>
+                    </div>
+                    <div class="stat-box positive">
+                        <h3>Прибыльных сделок</h3>
+                        <div class="value">1 (+48%)</div>
                     </div>
                 </div>
-            </div>
+
+                <div class="trades-list">
+                    <!-- Сделки FUTURES -->
+                </div>
+            </section>
+
+            <!-- SPOT -->
+            <section id="spot" class="tab-content">
+                <div class="stats-grid">
+                    <!-- Статистика SPOT -->
+                </div>
+                <div class="trades-list">
+                    <!-- Сделки SPOT -->
+                </div>
+            </section>
+
+            <!-- DEFI -->
+            <section id="defi" class="tab-content">
+                <div class="stats-grid">
+                    <!-- Статистика DEFI -->
+                </div>
+                <div class="trades-list">
+                    <!-- Сделки DEFI -->
+                </div>
+            </section>
         </main>
     </div>
 
-    <!-- Плавающие монеты -->
+    <!-- Плавающие элементы -->
     <div class="floating-coins"></div>
+    <div class="graph-overlay"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="script.js"></script>
