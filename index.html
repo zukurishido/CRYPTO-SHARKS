@@ -1,97 +1,130 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto Sharks - Private Club</title>
+    <title>Crypto Sharks - Приватный Клуб</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </head>
-<body class="bg-dark">
+<body>
     <div class="app-container">
-        <!-- Header Section -->
+        <!-- Фон с градиентом -->
+        <div class="background-gradient"></div>
+        
+        <!-- Шапка -->
         <header class="header">
             <div class="logo-container">
-                <svg class="shark-logo" viewBox="0 0 100 100">
-                    <path class="shark-path" d="M20 50 C30 30 70 30 80 50 C70 70 30 70 20 50" fill="none" stroke="currentColor" stroke-width="4" />
-                    <circle class="shark-eye" cx="35" cy="45" r="5"></circle>
-                </svg>
+                <div class="shark-logo-wrapper">
+                    <svg class="shark-logo" viewBox="0 0 100 100">
+                        <!-- Тело акулы -->
+                        <path class="shark-body" d="M15 50 Q 25 35, 45 35 T 75 50 T 45 65 T 15 50" />
+                        <!-- Плавник -->
+                        <path class="shark-fin" d="M45 35 L 55 25 L 65 35" />
+                        <!-- Хвост -->
+                        <path class="shark-tail" d="M75 50 L 85 40 L 90 50 L 85 60 Z" />
+                        <!-- Глаз -->
+                        <circle class="shark-eye" cx="35" cy="45" r="3" />
+                        <!-- Жабры -->
+                        <path class="shark-gills" d="M40 45 L 45 45 M 40 48 L 45 48 M 40 51 L 45 51" />
+                    </svg>
+                </div>
                 <h1 class="brand">CRYPTO SHARKS</h1>
             </div>
-            <div class="private-badge">PRIVAT CLUB</div>
+            <div class="private-badge glow-effect">ПРИВАТ КЛУБ</div>
         </header>
 
-        <!-- Main Content -->
+        <!-- Период -->
+        <div class="period-info">
+            <div class="period-badge glow-effect">
+                <span class="period-title">Статистика Приватки</span>
+                <span class="period-date">01.09.24-01.10.24</span>
+            </div>
+        </div>
+
+        <!-- Основной контент -->
         <main class="main-content">
             <nav class="tabs">
-                <button class="tab-btn active" data-tab="futures">FUTURES</button>
-                <button class="tab-btn" data-tab="spot">SPOT</button>
-                <button class="tab-btn" data-tab="defi">DEFI</button>
+                <button class="tab-btn active" data-tab="futures">
+                    <span class="tab-icon">📈</span>
+                    FUTURES
+                </button>
+                <button class="tab-btn" data-tab="spot">
+                    <span class="tab-icon">💎</span>
+                    SPOT
+                </button>
+                <button class="tab-btn" data-tab="defi">
+                    <span class="tab-icon">🚀</span>
+                    DEFI
+                </button>
             </nav>
 
-            <div class="stats-container">
-                <!-- Futures Tab -->
-                <div id="futures" class="tab-content active">
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <h3>Total Trades</h3>
-                            <div class="counter" data-target="3">0</div>
+            <!-- FUTURES -->
+            <div id="futures" class="tab-content active">
+                <div class="stats-overview">
+                    <div class="trade-summary">
+                        <div class="summary-item">
+                            <span class="label">Всего сделок:</span>
+                            <span class="value">3</span>
                         </div>
-                        <div class="stat-card">
-                            <h3>Win Rate</h3>
-                            <div class="counter" data-target="33.3">0</div>
-                            <span class="percent">%</span>
+                        <div class="summary-item">
+                            <span class="label">Сделок в Б/У:</span>
+                            <span class="value">1</span>
                         </div>
-                        <div class="stat-card">
-                            <h3>Total Profit</h3>
-                            <div class="counter" data-target="28.26">0</div>
-                            <span class="percent">%</span>
+                        <div class="summary-item">
+                            <span class="label">По стопу:</span>
+                            <span class="value negative">1 (-20%)</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Прибыльных:</span>
+                            <span class="value positive">1 (+48%)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="trades-list">
+                        <div class="trade-item profit">
+                            <div class="coin-info">
+                                <span class="coin-name">#BLZ</span>
+                                <span class="leverage">20x</span>
+                            </div>
+                            <span class="result positive">+48.26%</span>
+                        </div>
+                        <div class="trade-item loss">
+                            <div class="coin-info">
+                                <span class="coin-name">#TIA</span>
+                                <span class="leverage">10x</span>
+                            </div>
+                            <span class="result negative">-20%</span>
+                        </div>
+                        <div class="trade-item neutral">
+                            <div class="coin-info">
+                                <span class="coin-name">#ATOM</span>
+                                <span class="leverage">15x</span>
+                            </div>
+                            <span class="result neutral">б/у</span>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Spot Tab -->
-                <div id="spot" class="tab-content">
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <h3>Total Trades</h3>
-                            <div class="counter" data-target="17">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Win Rate</h3>
-                            <div class="counter" data-target="88.2">0</div>
-                            <span class="percent">%</span>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Total Profit</h3>
-                            <div class="counter" data-target="398">0</div>
-                            <span class="percent">%</span>
-                        </div>
-                    </div>
-                </div>
+            <!-- SPOT -->
+            <div id="spot" class="tab-content">
+                <!-- Аналогичная структура для SPOT -->
+            </div>
 
-                <!-- DeFi Tab -->
-                <div id="defi" class="tab-content">
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <h3>Total Trades</h3>
-                            <div class="counter" data-target="19">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Success Rate</h3>
-                            <div class="counter" data-target="84.2">0</div>
-                            <span class="percent">%</span>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Total Profit</h3>
-                            <div class="counter" data-target="2598">0</div>
-                            <span class="percent">%</span>
-                        </div>
-                    </div>
-                </div>
+            <!-- DEFI -->
+            <div id="defi" class="tab-content">
+                <!-- Аналогичная структура для DEFI -->
             </div>
         </main>
     </div>
+
+    <!-- Плавающие элементы -->
+    <div class="floating-elements">
+        <div class="coins-container"></div>
+        <div class="particles"></div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
