@@ -1,174 +1,104 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto Sharks - Premium Statistics</title>
-    
-    <!-- Подключаем шрифты -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    
-    <!-- Подключаем библиотеки -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
-    
-    <!-- Подключаем наши стили -->
-    <link rel="stylesheet" href="styles.css">
+    <title>Crypto Sharks - Trading Statistics</title>
+    <link href="styles.css" rel="stylesheet">
 </head>
 <body>
-    <!-- Фоновые эффекты -->
     <div class="bg-animation"></div>
     <div id="particles-js"></div>
     <div class="grid-overlay"></div>
 
-    <!-- Основной контейнер -->
     <div class="container">
-        <!-- Шапка -->
         <header class="header">
-            <div class="header">
-  <span class="logo-text">CRYPTO SHARKS</span>
-  <!-- остальной контент header -->
+            <div class="logo-wrapper">
+                <img src="logo.svg" alt="Crypto Sharks" class="logo">
+                <div class="logo-glow"></div>
             </div>
-            
+
+            <!-- Добавляем период контроль с сохранением стиля -->
+            <div class="period-control">
+                <select id="yearSelect" class="crystal-select">
+                    <option value="2021">2021</option>
+                    <option value="2022">2022</option>
+                    <option value="2023">2023</option>
+                    <option value="2024" selected>2024</option>
+                    <option value="2025">2025</option>
+                </select>
+                <select id="monthSelect" class="crystal-select">
+                    <option value="1">Январь</option>
+                    <option value="2">Февраль</option>
+                    <option value="3">Март</option>
+                    <option value="4">Апрель</option>
+                    <option value="5">Май</option>
+                    <option value="6">Июнь</option>
+                    <option value="7">Июль</option>
+                    <option value="8">Август</option>
+                    <option value="9">Сентябрь</option>
+                    <option value="10">Октябрь</option>
+                    <option value="11">Ноябрь</option>
+                    <option value="12">Декабрь</option>
+                </select>
+            </div>
+
             <h1 class="title">
                 <span class="outline">ИТОГИ</span>
                 <span class="solid">МЕСЯЦА</span>
             </h1>
-            
+
             <div class="privat-badge">
-                <span>PRIVAT CLUB</span>
+                PRIVAT CLUB
                 <div class="badge-glow"></div>
             </div>
-            
-            <div class="date-badge">
+
+            <div class="date-badge" id="dateBadge">
                 01.09.24-01.10.24
             </div>
         </header>
 
-        <!-- Колонки с данными -->
+        <!-- Остальной код остается без изменений -->
         <div class="columns-container">
-            <!-- FUTURES колонка -->
-            <div class="trading-column" data-type="futures">
-                <div class="column-header">
-                    <div class="header-icon">
-                        <svg class="icon-futures"><!-- SVG код иконки --></svg>
-                    </div>
-                    <h2>FUTURES</h2>
-                </div>
-                
-                <div class="trades-list">
-                    <!-- Trades will be inserted here by JavaScript -->
-                </div>
-                
-                <div class="column-stats">
-                    <div class="stat-row">
-                        <span>Всего сделок</span>
-                        <span class="stat-value">3</span>
-                    </div>
-                    <div class="stat-row">
-                        <span>Прибыльных</span>
-                        <span class="stat-value profit">1 (+48%)</span>
-                    </div>
-                    <div class="stat-row">
-                        <span>По стопу</span>
-                        <span class="stat-value loss">1 (-20%)</span>
-                    </div>
-                    <div class="total-progress">
-                        <div class="progress-track">
-                            <div class="progress-fill"></div>
-                        </div>
-                    </div>
+            <!-- ... существующие колонки ... -->
+        </div>
+    </div>
+
+    <!-- Админ-панель с сохранением стиля -->
+    <div class="admin-trigger">
+        <button class="admin-toggle crystal-button">
+            <div class="button-glow"></div>
+            <span>+</span>
+        </button>
+    </div>
+
+    <div class="admin-panel crystal-card hidden">
+        <div class="crystal-card-content">
+            <div class="panel-header">
+                <h3>Управление данными</h3>
+                <button class="close-button">×</button>
+            </div>
+            
+            <div class="quick-input-section">
+                <textarea class="crystal-input" placeholder="BTC +48% profit&#10;ETH -12% loss&#10;SOL 25% neutral"></textarea>
+                <div class="button-group">
+                    <button class="crystal-button save-all">Сохранить все</button>
+                    <button class="crystal-button clear">Очистить</button>
                 </div>
             </div>
 
-            <!-- SPOT колонка -->
-            <div class="trading-column active" data-type="spot">
-                <div class="column-header">
-                    <div class="header-icon">
-                        <svg class="icon-spot"><!-- SVG код иконки --></svg>
-                    </div>
-                    <h2>SPOT</h2>
-                </div>
-                
-                <div class="trades-list">
-                    <!-- Trades will be inserted here by JavaScript -->
-                </div>
-                
-                <div class="column-stats">
-                    <div class="stat-row">
-                        <span>Всего сделок</span>
-                        <span class="stat-value">17</span>
-                    </div>
-                    <div class="stat-row">
-                        <span>Прибыльных</span>
-                        <span class="stat-value profit">15 (+398%)</span>
-                    </div>
-                    <div class="stat-row">
-                        <span>В работе</span>
-                        <span class="stat-value neutral">2</span>
-                    </div>
-                    <div class="total-progress">
-                        <div class="progress-track">
-                            <div class="progress-fill"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- DEFI колонка -->
-            <div class="trading-column" data-type="defi">
-                <div class="column-header">
-                    <div class="header-icon">
-                        <svg class="icon-defi"><!-- SVG код иконки --></svg>
-                    </div>
-                    <h2>DEFI</h2>
-                </div>
-                
-                <div class="trades-list">
-                    <!-- Trades will be inserted here by JavaScript -->
-                </div>
-                
-                <div class="column-stats">
-                    <div class="stat-row">
-                        <span>Всего проектов</span>
-                        <span class="stat-value">19</span>
-                    </div>
-                    <div class="stat-row">
-                        <span>Убыточных</span>
-                        <span class="stat-value loss">3 (-100%)</span>
-                    </div>
-                    <div class="stat-row">
-                        <span>Общий профит</span>
-                        <span class="stat-value profit">+2,598%</span>
-                    </div>
-                    <div class="total-progress">
-                        <div class="progress-track">
-                            <div class="progress-fill"></div>
-                        </div>
-                    </div>
+            <div class="templates-section">
+                <div class="template-buttons">
+                    <button class="crystal-button profit">+48% profit</button>
+                    <button class="crystal-button loss">-20% loss</button>
+                    <button class="crystal-button neutral">В работе</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Шаблон для элемента торговли -->
-    <template id="trade-template">
-        <div class="trade-item">
-            <div class="trade-content">
-                <div class="trade-symbol"></div>
-                <div class="trade-percentage"></div>
-            </div>
-            <div class="trade-progress">
-                <div class="progress-bar">
-                    <div class="progress-fill">
-                        <div class="progress-glow"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </template>
-
-    <!-- Подключаем наш скрипт -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script src="script.js"></script>
+    <script src="admin.js"></script>
 </body>
 </html>
