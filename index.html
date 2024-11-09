@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRYPTO SHARKS - Итоги</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="css/animations.css">
@@ -16,7 +15,7 @@
             <div class="logo-section">
                 <h1 class="title">CRYPTO SHARKS</h1>
             </div>
-            <button onclick="toggleAdmin()" id="adminBtn">Админ панель</button>
+            <button onclick="toggleAdmin()" id="adminBtn" class="admin-btn">Админ панель</button>
         </header>
 
         <div class="filters" id="filters">
@@ -24,7 +23,7 @@
                 <option value="2021">2021</option>
                 <option value="2022">2022</option>
                 <option value="2023">2023</option>
-                <option value="2024">2024</option>
+                <option value="2024" selected>2024</option>
                 <option value="2025">2025</option>
             </select>
             <select id="monthSelect" onchange="updateContent()">
@@ -37,7 +36,7 @@
                 <option value="7">Июль</option>
                 <option value="8">Август</option>
                 <option value="9">Сентябрь</option>
-                <option value="10">Октябрь</option>
+                <option value="10" selected>Октябрь</option>
                 <option value="11">Ноябрь</option>
                 <option value="12">Декабрь</option>
             </select>
@@ -68,6 +67,12 @@
                     <button onclick="toggleAdmin()" class="close-btn">✕</button>
                 </div>
             </div>
+
+            <!-- Секция с текущими параметрами -->
+            <div id="currentSettings" class="current-settings">
+                <!-- Будет заполнено через JavaScript -->
+            </div>
+
             <div class="admin-form">
                 <div class="input-group">
                     <label>Пара</label>
