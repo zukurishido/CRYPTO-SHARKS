@@ -3,17 +3,7 @@ let isAuthenticated = false;
 let isAdminPanelVisible = false;
 
 // Обновление информации в админ-панели
-function updateAdminPanelInfo() { function toggleAdmin() {
-    if (!isAuthenticated) {
-        const password = prompt('Введите пароль администратора:');
-        if (password !== CONFIG.ADMIN_PASSWORD) {  // Теперь берём пароль из CONFIG
-            alert('Неверный пароль!');
-            return;
-        }
-        isAuthenticated = true;
-    }
-    // ... остальной код
-}
+function updateAdminPanelInfo() {
     const year = document.getElementById('yearSelect').value;
     const month = document.getElementById('monthSelect').value;
     const category = document.getElementById('categorySelect').value;
