@@ -1,104 +1,101 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto Sharks - Trading Statistics</title>
-    <link href="styles.css" rel="stylesheet">
+    <title>CRYPTO SHARKS - Итоги</title>
+    <!-- Подключаем стили -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <!-- GSAP для анимаций -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </head>
 <body>
-    <div class="bg-animation"></div>
-    <div id="particles-js"></div>
-    <div class="grid-overlay"></div>
-
     <div class="container">
-        <header class="header">
-            <div class="logo-wrapper">
-                <img src="logo.svg" alt="Crypto Sharks" class="logo">
-                <div class="logo-glow"></div>
+        <header class="header" id="header">
+            <div class="logo-section">
+                <h1 class="title">CRYPTO SHARKS</h1>
             </div>
-
-            <!-- Добавляем период контроль с сохранением стиля -->
-            <div class="period-control">
-                <select id="yearSelect" class="crystal-select">
-                    <option value="2021">2021</option>
-                    <option value="2022">2022</option>
-                    <option value="2023">2023</option>
-                    <option value="2024" selected>2024</option>
-                    <option value="2025">2025</option>
-                </select>
-                <select id="monthSelect" class="crystal-select">
-                    <option value="1">Январь</option>
-                    <option value="2">Февраль</option>
-                    <option value="3">Март</option>
-                    <option value="4">Апрель</option>
-                    <option value="5">Май</option>
-                    <option value="6">Июнь</option>
-                    <option value="7">Июль</option>
-                    <option value="8">Август</option>
-                    <option value="9">Сентябрь</option>
-                    <option value="10">Октябрь</option>
-                    <option value="11">Ноябрь</option>
-                    <option value="12">Декабрь</option>
-                </select>
-            </div>
-
-            <h1 class="title">
-                <span class="outline">ИТОГИ</span>
-                <span class="solid">МЕСЯЦА</span>
-            </h1>
-
-            <div class="privat-badge">
-                PRIVAT CLUB
-                <div class="badge-glow"></div>
-            </div>
-
-            <div class="date-badge" id="dateBadge">
-                01.09.24-01.10.24
-            </div>
+            <button onclick="toggleAdmin()" id="adminBtn">Админ панель</button>
         </header>
 
-        <!-- Остальной код остается без изменений -->
-        <div class="columns-container">
-            <!-- ... существующие колонки ... -->
+        <div class="filters" id="filters">
+            <select id="yearSelect" onchange="updateContent()">
+                <option value="2021">2021</option>
+                <option value="2022">2022</option>
+                <option value="2023">2023</option>
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+            </select>
+            <select id="monthSelect" onchange="updateContent()">
+                <option value="1">Январь</option>
+                <option value="2">Февраль</option>
+                <option value="3">Март</option>
+                <option value="4">Апрель</option>
+                <option value="5">Май</option>
+                <option value="6">Июнь</option>
+                <option value="7">Июль</option>
+                <option value="8">Август</option>
+                <option value="9">Сентябрь</option>
+                <option value="10">Октябрь</option>
+                <option value="11">Ноябрь</option>
+                <option value="12">Декабрь</option>
+            </select>
+            <select id="categorySelect" onchange="updateContent()">
+                <option value="SPOT">SPOT</option>
+                <option value="FUTURES">FUTURES</option>
+                <option value="DeFi">DeFi</option>
+            </select>
+        </div>
+
+        <div id="mainContent">
+            <div class="summary-stats" id="summaryStats">
+                <!-- Заполняется динамически -->
+            </div>
+
+            <div class="stats-container" id="statsContainer">
+                <div class="trades-grid" id="tradesGrid">
+                    <!-- Заполняется динамически -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Админ панель -->
+        <div class="admin-panel" id="adminPanel">
+            <div class="admin-header">
+                <h2>Админ панель</h2>
+                <button onclick="toggleAdmin()">✕</button>
+            </div>
+            <div class="admin-form">
+                <div class="input-group">
+                    <label>Пара</label>
+                    <input type="text" id="pairInput" placeholder="Например: BTC/USDT">
+                </div>
+                <div class="input-group">
+                    <label>Результат (%)</label>
+                    <input type="number" id="resultInput" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label>Статус</label>
+                    <select id="statusInput">
+                        <option value="profit">Прибыль</option>
+                        <option value="loss">Убыток</option>
+                        <option value="neutral">Нейтральный</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Комментарий</label>
+                    <textarea id="commentInput" rows="3"></textarea>
+                </div>
+                <button onclick="addTrade()">Добавить сделку</button>
+            </div>
         </div>
     </div>
 
-    <!-- Админ-панель с сохранением стиля -->
-    <div class="admin-trigger">
-        <button class="admin-toggle crystal-button">
-            <div class="button-glow"></div>
-            <span>+</span>
-        </button>
-    </div>
-
-    <div class="admin-panel crystal-card hidden">
-        <div class="crystal-card-content">
-            <div class="panel-header">
-                <h3>Управление данными</h3>
-                <button class="close-button">×</button>
-            </div>
-            
-            <div class="quick-input-section">
-                <textarea class="crystal-input" placeholder="BTC +48% profit&#10;ETH -12% loss&#10;SOL 25% neutral"></textarea>
-                <div class="button-group">
-                    <button class="crystal-button save-all">Сохранить все</button>
-                    <button class="crystal-button clear">Очистить</button>
-                </div>
-            </div>
-
-            <div class="templates-section">
-                <div class="template-buttons">
-                    <button class="crystal-button profit">+48% profit</button>
-                    <button class="crystal-button loss">-20% loss</button>
-                    <button class="crystal-button neutral">В работе</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-    <script src="script.js"></script>
-    <script src="admin.js"></script>
+    <!-- Подключаем скрипты -->
+    <script src="js/data.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/admin.js"></script>
 </body>
 </html>
