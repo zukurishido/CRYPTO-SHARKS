@@ -1,3 +1,5 @@
+// Конфигурация админа
+const ADMIN_PASSWORD = 'Cr5pt0Sh@rks2024#AdminP@nel';
 let isAuthenticated = false;
 let isAdminPanelVisible = false;
 
@@ -33,7 +35,7 @@ function updateAdminPanelInfo() {
 function toggleAdmin() {
     if (!isAuthenticated) {
         const password = prompt('Введите пароль администратора:');
-        if (password !== CONFIG.ADMIN_PASSWORD) {
+        if (password !== ADMIN_PASSWORD) {
             alert('Неверный пароль!');
             return;
         }
@@ -46,6 +48,7 @@ function toggleAdmin() {
     if (isAdminPanelVisible) {
         panel.classList.add('visible');
         updateAdminPanelInfo();
+        showBulkInput(); // Показываем форму массового ввода по умолчанию
         gsap.to(panel, {
             right: 0,
             duration: 0.3,
@@ -61,6 +64,148 @@ function toggleAdmin() {
     }
 }
 
+// Функция парсинга сделок
+function parseBulkTrades() {
+    const bulkText = document.getElementById('bulkInput').value;
+    const lines = bulkText.split('\n').filter(line => line.trim() !== '');
+    
+    let currentCategory = '';
+    let trades = [];
+    let stats = {
+        DEFI: { profit: 0, loss: 0, count: 0 },
+        FUTURES: { profit: 0, loss: 0, count: 0 },
+        SPOT: { profit: 0, loss: 0, count: 0 }
+    };
+
+    lines.forEach(line => {
+        // Определяем категорию
+        if (line.includes('DEFI:')) {
+            currentCategory = 'DEFI';
+            return;
+        } else if (line.includes('FUTURES:')) {
+            currentCategory = 'FUTURES';
+            return;
+        } else if (line.includes('SPOT:')) {
+            currentCategory = 'SPOT';
+            return;
+        }
+
+        // Парсим сделку
+        const tradeMatch = line.match(/\d+\.#(\w+)\s*([-+])\s*(\d+\.?\d*)%\s*(?:\((\d+)x\)?)?/);
+        
+        if (tradeMatch && currentCategory) {
+            const [_, symbol, sign, value, leverage] = tradeMatch;
+            const result = (sign === '+' ? 1 : -1) * parseFloat(value);
+            
+            const trade = {
+                pair: symbol,
+                result: result,
+                status: result > 0 ? 'profit' : (result < 0 ? 'loss' : 'neutral'),
+                leverage: leverage || '',
+                comment: leverage ? `(${leverage}x)` : '',
+                category: currentCategory
+            };
+
+            trades.push(trade);
+
+            // Обновляем статистику
+            if (result > 0) {
+                stats[currentCategory].profit += result;
+            } else {
+                stats[currentCategory].loss += Math.abs(result);
+            }
+            stats[currentCategory].count++;
+        }
+    });
+
+    // Формируем текст подтверждения
+    let confirmText = 'Найдены сделки:\n\n';
+    
+    for (let category in stats) {
+        if (stats[category].count > 0) {
+            confirmText += `${category}:\n`;
+            confirmText += `Количество: ${stats[category].count}\n`;
+            confirmText += `Общий профит: +${stats[category].profit.toFixed(1)}%\n`;
+            confirmText += `Общий убыток: -${stats[category].loss.toFixed(1)}%\n\n`;
+        }
+    }
+
+    confirmText += 'Добавить эти сделки?';
+
+    // Подтверждение
+    if (confirm(confirmText)) {
+        const year = document.getElementById('yearSelect').value;
+        const month = document.getElementById('monthSelect').value;
+
+        trades.forEach(trade => {
+            addTradeData(year, month, trade.category, {
+                pair: trade.pair,
+                result: trade.result,
+                status: trade.status,
+                comment: trade.comment
+            });
+        });
+
+        updateContent();
+        document.getElementById('bulkInput').value = '';
+        showSuccessMessage(`Добавлено ${trades.length} сделок`);
+    }
+}
+
+// Обновляем HTML форму для массового ввода
+function showBulkInput() {
+    document.querySelector('.admin-form').innerHTML = `
+        <div class="input-group">
+            <label>Массовое добавление сделок</label>
+            <textarea id="bulkInput" rows="15" placeholder="DEFI:🚀
+1.#FIT +20%
+2.#AMT +22%
+
+FUTURES:🚀
+1.#BNB +35% (5х)
+2.#CELO +76% (20х)
+
+SPOT:🚀
+1.#TWT +35%
+2.#NEAR -15%"></textarea>
+        </div>
+        <div class="button-group">
+            <button onclick="parseBulkTrades()" class="add-btn">Добавить все сделки</button>
+            <button onclick="showRegularForm()" class="secondary-btn">Обычная форма</button>
+        </div>
+    `;
+}
+
+// Показ обычной формы
+function showRegularForm() {
+    document.querySelector('.admin-form').innerHTML = `
+        <div class="input-group">
+            <label>Пара</label>
+            <input type="text" id="pairInput" placeholder="Например: BTC/USDT">
+        </div>
+        <div class="input-group">
+            <label>Результат (%)</label>
+            <input type="number" id="resultInput" step="0.01">
+        </div>
+        <div class="input-group">
+            <label>Статус</label>
+            <select id="statusInput">
+                <option value="profit">Прибыль</option>
+                <option value="loss">Убыток</option>
+                <option value="neutral">Нейтральный</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Комментарий</label>
+            <textarea id="commentInput" rows="3"></textarea>
+        </div>
+        <div class="button-group">
+            <button onclick="addTrade()" class="add-btn">Добавить сделку</button>
+            <button onclick="showBulkInput()" class="secondary-btn">Массовое добавление</button>
+        </div>
+    `;
+}
+
 // Выход из админ-панели
 function logoutAdmin() {
     isAuthenticated = false;
@@ -74,63 +219,20 @@ function logoutAdmin() {
     });
 }
 
-// Добавление новой сделки
-function addTrade() {
-    if (!isAuthenticated) {
-        alert('Необходима авторизация!');
-        return;
-    }
-
-    const year = document.getElementById('yearSelect').value;
-    const month = document.getElementById('monthSelect').value;
-    const category = document.getElementById('categorySelect').value;
-    
-    const tradeData = {
-        pair: document.getElementById('pairInput').value,
-        result: Number(document.getElementById('resultInput').value),
-        status: document.getElementById('statusInput').value,
-        comment: document.getElementById('commentInput').value
-    };
-
-    // Валидация
-    if (!tradeData.pair) {
-        alert('Введите пару!');
-        return;
-    }
-
-    // Подтверждение добавления
-    const confirmation = confirm(`Добавить сделку:\nГод: ${year}\nМесяц: ${month}\nКатегория: ${category}\nПара: ${tradeData.pair}\nРезультат: ${tradeData.result}%`);
-    
-    if (confirmation) {
-        addTradeData(year, month, category, tradeData);
-        updateContent();
-        clearAdminForm();
-        showSuccessMessage();
-    }
-}
-
-// Очистка формы админ-панели
-function clearAdminForm() {
-    document.getElementById('pairInput').value = '';
-    document.getElementById('resultInput').value = '';
-    document.getElementById('statusInput').value = 'profit';
-    document.getElementById('commentInput').value = '';
-}
-
 // Показ сообщения об успешном добавлении
-function showSuccessMessage() {
-    const message = document.createElement('div');
-    message.className = 'success-message fade-in';
-    message.textContent = 'Сделка успешно добавлена';
+function showSuccessMessage(message) {
+    const msgElem = document.createElement('div');
+    msgElem.className = 'success-message fade-in';
+    msgElem.textContent = message;
     
-    document.querySelector('.admin-form').appendChild(message);
+    document.querySelector('.admin-form').appendChild(msgElem);
     
     setTimeout(() => {
-        gsap.to(message, {
+        gsap.to(msgElem, {
             opacity: 0,
             y: -20,
             duration: 0.3,
-            onComplete: () => message.remove()
+            onComplete: () => msgElem.remove()
         });
     }, 2000);
 }
