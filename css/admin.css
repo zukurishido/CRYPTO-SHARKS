@@ -21,6 +21,13 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--primary);
+}
+
+.admin-controls {
+    display: flex;
+    gap: 10px;
 }
 
 .admin-form {
@@ -33,25 +40,62 @@
     gap: 10px;
 }
 
-input, textarea {
+.input-group label {
+    color: #fff;
+    font-size: 0.9em;
+}
+
+input, textarea, select {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--primary);
     color: white;
     padding: 10px;
     border-radius: 5px;
+    font-size: 1em;
 }
 
-button {
+input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: #fff;
+}
+
+.logout-btn {
+    background: #ff4444;
+}
+
+.logout-btn:hover {
+    background: #cc0000;
+}
+
+.add-btn {
     background: var(--primary);
     color: black;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    font-weight: bold;
+    padding: 12px;
 }
 
-button:hover {
-    background: var(--primary-dark);
-    transform: translateY(-2px);
+.close-btn {
+    background: transparent;
+    border: 1px solid #fff;
+    color: #fff;
+}
+
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.success-message {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--primary);
+    color: black;
+    padding: 15px 25px;
+    border-radius: 5px;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
