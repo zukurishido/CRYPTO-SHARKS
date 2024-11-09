@@ -4,12 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRYPTO SHARKS - Итоги</title>
-    <!-- Подключаем стили -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="css/animations.css">
-    <!-- GSAP для анимаций -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -51,21 +50,23 @@
 
         <div id="mainContent">
             <div class="summary-stats" id="summaryStats">
-                <!-- Заполняется динамически -->
+                <!-- Динамическое наполнение -->
             </div>
 
             <div class="stats-container" id="statsContainer">
                 <div class="trades-grid" id="tradesGrid">
-                    <!-- Заполняется динамически -->
+                    <!-- Динамическое наполнение -->
                 </div>
             </div>
         </div>
 
-        <!-- Админ панель -->
         <div class="admin-panel" id="adminPanel">
             <div class="admin-header">
                 <h2>Админ панель</h2>
-                <button onclick="toggleAdmin()">✕</button>
+                <div class="admin-controls">
+                    <button onclick="logoutAdmin()" class="logout-btn">Выйти</button>
+                    <button onclick="toggleAdmin()" class="close-btn">✕</button>
+                </div>
             </div>
             <div class="admin-form">
                 <div class="input-group">
@@ -88,12 +89,11 @@
                     <label>Комментарий</label>
                     <textarea id="commentInput" rows="3"></textarea>
                 </div>
-                <button onclick="addTrade()">Добавить сделку</button>
+                <button onclick="addTrade()" class="add-btn">Добавить сделку</button>
             </div>
         </div>
     </div>
 
-    <!-- Подключаем скрипты -->
     <script src="js/data.js"></script>
     <script src="js/main.js"></script>
     <script src="js/admin.js"></script>
