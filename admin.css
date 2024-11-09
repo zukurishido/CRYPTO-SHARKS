@@ -1,0 +1,57 @@
+.admin-panel {
+    position: fixed;
+    right: -400px;
+    top: 0;
+    width: 400px;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.95);
+    padding: 20px;
+    transition: right 0.3s ease;
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+.admin-panel.visible {
+    right: 0;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.admin-form {
+    display: grid;
+    gap: 20px;
+}
+
+.input-group {
+    display: grid;
+    gap: 10px;
+}
+
+input, textarea {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--primary);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+button {
+    background: var(--primary);
+    color: black;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+}
