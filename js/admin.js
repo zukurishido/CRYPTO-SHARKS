@@ -1,8 +1,19 @@
-// Состояние админ-панели
+// Конфигурация админа
+const ADMIN_PASSWORD = 'Cr5pt0Sh@rks2024#AdminP@nel'; // Сложный пароль
+let isAuthenticated = false;
 let isAdminPanelVisible = false;
 
 // Переключение видимости админ-панели
 function toggleAdmin() {
+    if (!isAuthenticated) {
+        const password = prompt('Введите пароль администратора:');
+        if (password !== ADMIN_PASSWORD) {
+            alert('Неверный пароль!');
+            return;
+        }
+        isAuthenticated = true;
+    }
+
     const panel = document.getElementById('adminPanel');
     isAdminPanelVisible = !isAdminPanelVisible;
     
@@ -23,8 +34,26 @@ function toggleAdmin() {
     }
 }
 
+// Выход из админ-панели
+function logoutAdmin() {
+    isAuthenticated = false;
+    isAdminPanelVisible = false;
+    const panel = document.getElementById('adminPanel');
+    gsap.to(panel, {
+        right: -400,
+        duration: 0.3,
+        ease: 'power2.in',
+        onComplete: () => panel.classList.remove('visible')
+    });
+}
+
 // Добавление новой сделки
 function addTrade() {
+    if (!isAuthenticated) {
+        alert('Необходима авторизация!');
+        return;
+    }
+
     const year = document.getElementById('yearSelect').value;
     const month = document.getElementById('monthSelect').value;
     const category = document.getElementById('categorySelect').value;
@@ -46,7 +75,7 @@ function addTrade() {
     addTradeData(year, month, category, tradeData);
     updateContent();
     clearAdminForm();
-
+    
     // Анимация успешного добавления
     showSuccessMessage();
 }
@@ -76,3 +105,9 @@ function showSuccessMessage() {
         });
     }, 2000);
 }
+
+// Проверка авторизации при загрузке
+document.addEventListener('DOMContentLoaded', () => {
+    isAuthenticated = false;
+    isAdminPanelVisible = false;
+});
