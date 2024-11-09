@@ -1,5 +1,4 @@
 // Конфигурация админа
-const ADMIN_PASSWORD = 'Cr5pt0Sh@rks2024#AdminP@nel';
 let isAuthenticated = false;
 let isAdminPanelVisible = false;
 
