@@ -63,30 +63,28 @@
             <div class="admin-header">
                 <h2>Админ панель</h2>
                 <div class="admin-controls">
+                    <button onclick="changeAdminPassword()" class="password-btn">Изменить пароль</button>
                     <button onclick="logoutAdmin()" class="logout-btn">Выйти</button>
                     <button onclick="toggleAdmin()" class="close-btn">✕</button>
                 </div>
             </div>
 
-            <!-- Секция с текущими параметрами -->
             <div id="currentSettings" class="current-settings">
                 <!-- Будет заполнено через JavaScript -->
             </div>
 
-            <!-- Переключатель режимов -->
             <div class="mode-switcher">
                 <button onclick="showBulkInput()" class="mode-btn active">Массовое добавление</button>
                 <button onclick="showRegularForm()" class="mode-btn">Одиночное добавление</button>
             </div>
 
             <div class="admin-form">
-                <!-- Форма будет динамически заполняться через JavaScript -->
+                <!-- Форма будет динамически заполняться -->
             </div>
         </div>
     </div>
 
     <!-- Скрипты -->
-    <script src="js/config.js"></script>
     <script src="js/data.js"></script>
     <script src="js/main.js"></script>
     <script src="js/admin.js"></script>
