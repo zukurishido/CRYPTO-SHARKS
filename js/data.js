@@ -1,10 +1,10 @@
-// Начальные данные
+// Структура для хранения данных
 let data = {
     '2024': {
         '10': {
             'SPOT': { trades: [] },
             'FUTURES': { trades: [] },
-            'DEFI': { trades: [] }
+            'DeFi': { trades: [] }
         }
     }
 };
@@ -24,7 +24,7 @@ function saveData() {
 
 // Добавление новой сделки
 function addTradeData(year, month, category, tradeData) {
-    // Создаем структуру, если её нет
+    // Создаем структуру если её нет
     if (!data[year]) {
         data[year] = {};
     }
@@ -42,6 +42,26 @@ function addTradeData(year, month, category, tradeData) {
     saveData();
 }
 
+// Обновление существующей сделки
+function updateTradeData(year, month, category, index, tradeData) {
+    if (data[year]?.[month]?.[category]?.trades[index]) {
+        data[year][month][category].trades[index] = tradeData;
+        saveData();
+        return true;
+    }
+    return false;
+}
+
+// Удаление сделки
+function deleteTradeData(year, month, category, index) {
+    if (data[year]?.[month]?.[category]?.trades[index]) {
+        data[year][month][category].trades.splice(index, 1);
+        saveData();
+        return true;
+    }
+    return false;
+}
+
 // Получение данных за период
 function getPeriodData(year, month, category) {
     return data[year]?.[month]?.[category]?.trades || [];
@@ -51,26 +71,109 @@ function getPeriodData(year, month, category) {
 function calculateStats(trades) {
     let totalProfit = 0;
     let totalLoss = 0;
+    let profitCount = 0;
+    let lossCount = 0;
+    let neutCount = 0;
     
     trades.forEach(trade => {
         if (trade.result > 0) {
             totalProfit += trade.result;
-        } else {
+            profitCount++;
+        } else if (trade.result < 0) {
             totalLoss += Math.abs(trade.result);
+            lossCount++;
+        } else {
+            neutCount++;
         }
     });
 
+    const total = trades.length;
+    
     return {
-        totalTrades: trades.length,
-        profitTrades: trades.filter(t => t.result > 0).length,
-        lossTrades: trades.filter(t => t.result < 0).length,
-        neutralTrades: trades.filter(t => t.result === 0).length,
+        totalTrades: total,
+        profitTrades: profitCount,
+        lossTrades: lossCount,
+        neutralTrades: neutCount,
         totalProfit: totalProfit.toFixed(1),
         totalLoss: totalLoss.toFixed(1),
-        winRate: trades.length ? 
-            ((trades.filter(t => t.result > 0).length / trades.length) * 100).toFixed(1) : 0
+        netProfit: (totalProfit - totalLoss).toFixed(1),
+        winRate: total > 0 ? ((profitCount / total) * 100).toFixed(1) : 0
     };
 }
 
-// Загружаем данные при старте
-loadData();
+// Парсинг массового ввода
+function parseTrades(text) {
+    const lines = text.split('\n').filter(line => line.trim());
+    let currentCategory = '';
+    let trades = [];
+    
+    lines.forEach(line => {
+        // Определение категории
+        if (line.includes('DEFI:') || line.includes('DeFi:')) {
+            currentCategory = 'DeFi';
+            return;
+        } else if (line.includes('FUTURES:')) {
+            currentCategory = 'FUTURES';
+            return;
+        } else if (line.includes('SPOT:')) {
+            currentCategory = 'SPOT';
+            return;
+        }
+
+        // Парсинг сделки
+        const tradeMatch = line.match(/\d+\.#(\w+)\s*([-+])\s*(\d+\.?\d*)%\s*(?:\((\d+)x\)?)?/);
+        
+        if (tradeMatch && currentCategory) {
+            const [_, symbol, sign, value, leverage] = tradeMatch;
+            const result = (sign === '+' ? 1 : -1) * parseFloat(value);
+            
+            trades.push({
+                pair: symbol,
+                result: result,
+                status: result > 0 ? 'profit' : (result < 0 ? 'loss' : 'neutral'),
+                leverage: leverage || '',
+                comment: leverage ? `(${leverage}x)` : '',
+                category: currentCategory
+            });
+        }
+    });
+
+    return trades;
+}
+
+// Экспорт данных
+function exportData() {
+    return {
+        data: JSON.stringify(data),
+        timestamp: new Date().toISOString()
+    };
+}
+
+// Импорт данных
+function importData(jsonData) {
+    try {
+        const importedData = JSON.parse(jsonData);
+        data = importedData;
+        saveData();
+        return true;
+    } catch (error) {
+        console.error('Ошибка импорта данных:', error);
+        return false;
+    }
+}
+
+// Очистка данных за период
+function clearPeriodData(year, month, category) {
+    if (data[year]?.[month]?.[category]) {
+        data[year][month][category].trades = [];
+        saveData();
+        return true;
+    }
+    return false;
+}
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', () => {
+    loadData();
+    updateContent(); // Функция должна быть определена в main.js
+});
