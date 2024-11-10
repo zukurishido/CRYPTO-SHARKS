@@ -10,6 +10,17 @@
     }
 }
 
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
 @keyframes scaleIn {
     from {
         opacity: 0;
@@ -21,21 +32,66 @@
     }
 }
 
-@keyframes slideInRight {
+@keyframes shine {
     from {
-        opacity: 0;
-        transform: translateX(20px);
+        transform: translateX(-100%);
     }
     to {
-        opacity: 1;
-        transform: translateX(0);
+        transform: translateX(100%);
     }
 }
 
 @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.02); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(0, 255, 157, 0.4);
+    }
+    70% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 10px rgba(0, 255, 157, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(0, 255, 157, 0);
+    }
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+@keyframes progress {
+    from {
+        width: 0;
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    to {
+        width: var(--progress-width);
+        opacity: 1;
+    }
+}
+
+@keyframes borderGlow {
+    0% {
+        box-shadow: 0 0 5px var(--primary);
+    }
+    50% {
+        box-shadow: 0 0 20px var(--primary);
+    }
+    100% {
+        box-shadow: 0 0 5px var(--primary);
+    }
 }
 
 /* Классы анимаций */
@@ -43,37 +99,161 @@
     animation: fadeIn 0.5s ease forwards;
 }
 
+.slide-in {
+    animation: slideIn 0.5s ease forwards;
+}
+
 .scale-in {
     animation: scaleIn 0.5s ease forwards;
 }
 
-.slide-in {
-    animation: slideInRight 0.5s ease forwards;
+.float {
+    animation: float 3s ease-in-out infinite;
 }
 
 .pulse {
     animation: pulse 2s infinite;
 }
 
-/* Задержки */
+/* Задержки для каскадных анимаций */
 .delay-1 { animation-delay: 0.1s; }
 .delay-2 { animation-delay: 0.2s; }
 .delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+.delay-5 { animation-delay: 0.5s; }
 
-/* Hover эффекты */
-.hover-scale {
+/* Анимации для карточек сделок */
+.trade-card {
+    --progress-width: 0%;
+    opacity: 0;
+    transform: translateX(-20px);
+}
+
+.trade-card.visible {
+    animation: slideIn 0.5s ease forwards;
+}
+
+.trade-card:hover {
+    transform: translateY(-2px);
     transition: transform 0.3s ease;
 }
 
-.hover-scale:hover {
-    transform: scale(1.02);
+/* Анимация прогресс-бара */
+.progress-bar {
+    animation: progress 1.5s ease-out forwards;
 }
 
+.progress-shine {
+    animation: shine 2s infinite;
+}
+
+/* Анимации для кнопок */
+.btn-hover-effect {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-hover-effect:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 150%;
+    height: 150%;
+    background: rgba(255, 255, 255, 0.1);
+    transform: translate(-50%, -50%) scale(0);
+    border-radius: 50%;
+    transition: transform 0.5s ease;
+}
+
+.btn-hover-effect:active:after {
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* Анимации для уведомлений */
+.notification {
+    animation: slideIn 0.3s ease forwards;
+}
+
+.notification.success {
+    background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+}
+
+.notification.error {
+    background: linear-gradient(45deg, #ef4444, #dc2626);
+}
+
+/* Анимации для админ-панели */
+.admin-panel {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.admin-panel.visible {
+    transform: translateX(0);
+}
+
+/* Анимации для форм */
+.input-group {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.input-group.visible {
+    animation: fadeIn 0.3s ease forwards;
+}
+
+/* Hover эффекты */
 .hover-lift {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.3s ease;
 }
 
 .hover-lift:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0, 255, 157, 0.2);
+    transform: translateY(-2px);
+}
+
+.hover-glow:hover {
+    animation: borderGlow 1.5s infinite;
+}
+
+/* Анимации иконок */
+.icon-spin {
+    animation: spin 2s linear infinite;
+}
+
+.icon-pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Анимации для статистики */
+.stat-value {
+    opacity: 0;
+    transform: scale(0.9);
+}
+
+.stat-value.visible {
+    animation: scaleIn 0.5s ease forwards;
+}
+
+/* Эффект свечения для активных элементов */
+.glow-effect {
+    position: relative;
+}
+
+.glow-effect::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    background: linear-gradient(45deg, var(--primary), transparent);
+    border-radius: inherit;
+    z-index: -1;
+    animation: borderGlow 2s infinite;
 }
