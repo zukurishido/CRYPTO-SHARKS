@@ -73,28 +73,14 @@
                 <!-- Будет заполнено через JavaScript -->
             </div>
 
+            <!-- Переключатель режимов -->
+            <div class="mode-switcher">
+                <button onclick="showBulkInput()" class="mode-btn active">Массовое добавление</button>
+                <button onclick="showRegularForm()" class="mode-btn">Одиночное добавление</button>
+            </div>
+
             <div class="admin-form">
-                <div class="input-group">
-                    <label>Пара</label>
-                    <input type="text" id="pairInput" placeholder="Например: BTC/USDT">
-                </div>
-                <div class="input-group">
-                    <label>Результат (%)</label>
-                    <input type="number" id="resultInput" step="0.01">
-                </div>
-                <div class="input-group">
-                    <label>Статус</label>
-                    <select id="statusInput">
-                        <option value="profit">Прибыль</option>
-                        <option value="loss">Убыток</option>
-                        <option value="neutral">Нейтральный</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label>Комментарий</label>
-                    <textarea id="commentInput" rows="3"></textarea>
-                </div>
-                <button onclick="addTrade()" class="add-btn">Добавить сделку</button>
+                <!-- Форма будет динамически заполняться через JavaScript -->
             </div>
         </div>
     </div>
