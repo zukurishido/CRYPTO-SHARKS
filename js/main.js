@@ -1,29 +1,3 @@
-// Инициализация GSAP
-gsap.config({ force3D: true });
-
-// Основные анимации при загрузке
-document.addEventListener('DOMContentLoaded', () => {
-    initializeAnimations();
-    updateContent();
-});
-
-function initializeAnimations() {
-    gsap.from('#header', {
-        opacity: 0,
-        y: -20,
-        duration: 1,
-        ease: 'power2.out'
-    });
-
-    gsap.from('#filters', {
-        opacity: 0,
-        y: 20,
-        duration: 1,
-        delay: 0.3,
-        ease: 'power2.out'
-    });
-}
-
 // Обновление контента при изменении фильтров
 function updateContent() {
     const year = document.getElementById('yearSelect').value;
@@ -37,7 +11,7 @@ function updateContent() {
     updateTradesGrid(trades);
 }
 
-// Обновление сводной статистики
+// Обновление статистики
 function updateSummaryStats(stats) {
     const summaryStats = document.getElementById('summaryStats');
     summaryStats.innerHTML = `
@@ -46,39 +20,83 @@ function updateSummaryStats(stats) {
             <div class="stat-value">${stats.totalTrades}</div>
         </div>
         <div class="stat-box fade-in delay-2">
-            <h3>Winrate</h3>
-            <div class="stat-value">${stats.winRate}%</div>
+            <h3>Прибыльных</h3>
+            <div class="stat-value profit">+${stats.totalProfit}%</div>
         </div>
         <div class="stat-box fade-in delay-3">
-            <h3>Общий профит</h3>
-            <div class="stat-value ${stats.totalProfit >= 0 ? 'profit' : 'loss'}">
-                ${stats.totalProfit > 0 ? '+' : ''}${stats.totalProfit}%
-            </div>
+            <h3>Убыточных</h3>
+            <div class="stat-value loss">-${stats.totalLoss}%</div>
+        </div>
+        <div class="stat-box fade-in delay-4">
+            <h3>Winrate</h3>
+            <div class="stat-value">${stats.winRate}%</div>
         </div>
     `;
 }
 
-// Обновление сетки сделок
+// Обновление списка сделок
 function updateTradesGrid(trades) {
-    const tradesGrid = document.getElementById('tradesGrid');
-    tradesGrid.innerHTML = '';
+    const container = document.getElementById('tradesGrid');
+    container.innerHTML = '';
 
     trades.forEach((trade, index) => {
-        const tradeCard = document.createElement('div');
-        tradeCard.className = `trade-card ${trade.status} scale-in`;
-        tradeCard.style.animationDelay = `${index * 0.1}s`;
-
-        tradeCard.innerHTML = `
-            <div class="trade-header">
-                <span>${trade.pair}</span>
-                <span>${trade.result > 0 ? '+' : ''}${trade.result}%</span>
-            </div>
-            ${trade.comment ? `<div class="trade-comment">${trade.comment}</div>` : ''}
-            <div class="progress-container">
-                <div class="progress-bar" style="width: ${Math.abs(trade.result)}%"></div>
-            </div>
-        `;
-
-        tradesGrid.appendChild(tradeCard);
+        const card = createTradeCard(trade, index);
+        container.appendChild(card);
     });
 }
+
+// Создание карточки сделки с анимацией
+function createTradeCard(trade, index) {
+    const card = document.createElement('div');
+    card.className = `trade-card ${trade.status}`;
+    
+    card.innerHTML = `
+        <div class="active-glow"></div>
+        <div class="trade-header">
+            <div class="trade-pair">
+                <div class="pair-icon">
+                    ${trade.result > 0 ? 
+                        '<i class="lucide lucide-trending-up"></i>' : 
+                        (trade.result < 0 ? 
+                            '<i class="lucide lucide-trending-down"></i>' : 
+                            '<i class="lucide lucide-minus"></i>')}
+                </div>
+                <div class="pair-name">#${trade.pair}</div>
+            </div>
+            <div class="trade-result">
+                ${trade.result > 0 ? '+' : ''}${trade.result}%
+                ${trade.leverage ? ` (${trade.leverage})` : ''}
+            </div>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar" style="width: 0%">
+                <div class="progress-shine"></div>
+            </div>
+        </div>
+        ${trade.comment ? `<div class="trade-comment">${trade.comment}</div>` : ''}
+    `;
+
+    // Эффект свечения при наведении
+    card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        card.style.setProperty('--x', `${x}%`);
+        card.style.setProperty('--y', `${y}%`);
+    });
+
+    // Анимация появления
+    setTimeout(() => {
+        card.classList.add('visible');
+        const progressBar = card.querySelector('.progress-bar');
+        const width = Math.min(Math.abs(trade.result) * 1.5, 100);
+        progressBar.style.width = `${width}%`;
+    }, index * 100);
+
+    return card;
+}
+
+// Инициализация
+document.addEventListener('DOMContentLoaded', () => {
+    updateContent();
+});
