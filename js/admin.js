@@ -1,4 +1,3 @@
-// Конфигурация админа
 let isAuthenticated = false;
 let isAdminPanelVisible = false;
 
@@ -34,7 +33,7 @@ function updateAdminPanelInfo() {
 function toggleAdmin() {
     if (!isAuthenticated) {
         const password = prompt('Введите пароль администратора:');
-        if (password !== ADMIN_PASSWORD) {
+        if (password !== CONFIG.ADMIN_PASSWORD) {
             alert('Неверный пароль!');
             return;
         }
