@@ -30,16 +30,6 @@
     gap: 10px;
 }
 
-.admin-btn {
-    background: var(--primary);
-    color: black;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
 .current-settings {
     background: rgba(0, 255, 157, 0.1);
     border: 1px solid var(--primary);
@@ -55,10 +45,6 @@
     font-size: 0.9em;
 }
 
-.current-setting:last-child {
-    margin-bottom: 0;
-}
-
 .setting-label {
     color: var(--primary);
     font-weight: bold;
@@ -68,58 +54,64 @@
     color: white;
 }
 
-.admin-form {
-    display: grid;
-    gap: 20px;
-}
-
-.input-group {
-    display: grid;
+/* Новые стили для массового добавления */
+.mode-switcher {
+    display: flex;
     gap: 10px;
+    margin-bottom: 20px;
 }
 
-.input-group label {
-    color: #fff;
-    font-size: 0.9em;
+.mode-btn {
+    flex: 1;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-input, textarea, select {
-    background: rgba(255, 255, 255, 0.05);
+.mode-btn.active {
+    background: var(--primary);
+    color: black;
+}
+
+#bulkInput {
+    font-family: monospace;
+    min-height: 300px;
+    line-height: 1.4;
+    font-size: 14px;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.3);
     border: 1px solid var(--primary);
     color: white;
     padding: 10px;
     border-radius: 5px;
-    font-size: 1em;
+    resize: vertical;
 }
 
-input:focus, textarea:focus, select:focus {
-    outline: none;
-    border-color: #fff;
-}
-
-.logout-btn {
-    background: #ff4444;
-}
-
-.logout-btn:hover {
-    background: #cc0000;
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
 }
 
 .add-btn {
     background: var(--primary);
     color: black;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 5px;
+    cursor: pointer;
     font-weight: bold;
-    padding: 12px;
+    transition: all 0.3s ease;
+    width: 100%;
 }
 
-.close-btn {
-    background: transparent;
-    border: 1px solid #fff;
-    color: #fff;
-}
-
-.close-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
+.add-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
 }
 
 .success-message {
@@ -131,4 +123,47 @@ input:focus, textarea:focus, select:focus {
     padding: 15px 25px;
     border-radius: 5px;
     animation: fadeIn 0.3s ease;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--primary);
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--primary);
+    color: white;
+    border-radius: 5px;
+}
+
+.logout-btn {
+    background: #ff4444;
+}
+
+.logout-btn:hover {
+    background: #cc0000;
+}
+
+.close-btn {
+    background: transparent;
+    border: 1px solid #fff;
+    color: #fff;
+    padding: 8px 12px;
+}
+
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
