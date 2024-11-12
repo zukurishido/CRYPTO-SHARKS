@@ -1,15 +1,7 @@
-// Структура для хранения данных
-let data = {
-    '2024': {
-        '10': {
-            'SPOT': { trades: [] },
-            'FUTURES': { trades: [] },
-            'DeFi': { trades: [] }
-        }
-    }
-};
+// Структура данных
+let data = {};
 
-// Загрузка данных из localStorage
+// Загрузка данных
 function loadData() {
     const savedData = localStorage.getItem('cryptoSharksData');
     if (savedData) {
@@ -17,45 +9,84 @@ function loadData() {
     }
 }
 
-// Сохранение данных в localStorage
+// Сохранение данных
 function saveData() {
     localStorage.setItem('cryptoSharksData', JSON.stringify(data));
 }
 
-// Добавление новой сделки
-function addTradeData(year, month, category, tradeData) {
-    // Создаем структуру если её нет
-    if (!data[year]) {
-        data[year] = {};
-    }
-    if (!data[year][month]) {
-        data[year][month] = {};
-    }
-    if (!data[year][month][category]) {
-        data[year][month][category] = { trades: [] };
-    }
-
-    // Добавляем сделку
-    data[year][month][category].trades.push(tradeData);
+// Парсинг любого формата данных
+function parseTradesFlexible(text) {
+    const cleanText = text.replace(/[^\w\s+\-#%().,]/g, '');
+    const lines = cleanText.split('\n').filter(line => line.trim());
+    const trades = [];
     
-    // Сохраняем данные
+    lines.forEach(line => {
+        // Паттерн 1: #SYMBOL +/-XX%
+        const pattern1 = /#(\w+)\s*([-+])\s*(\d+\.?\d*)%/;
+        
+        // Паттерн 2: SYMBOL +/-XX%
+        const pattern2 = /(\w+)\s*([-+])\s*(\d+\.?\d*)%/;
+        
+        // Паттерн для левериджа
+        const leveragePattern = /\((\d+)x\)/i;
+        
+        let match = line.match(pattern1) || line.match(pattern2);
+        
+        if (match) {
+            const [_, symbol, sign, value] = match;
+            const leverageMatch = line.match(leveragePattern);
+            const leverage = leverageMatch ? leverageMatch[1] : '';
+            
+            const result = (sign === '+' ? 1 : -1) * parseFloat(value);
+            
+            trades.push({
+                id: Date.now() + Math.random(),
+                pair: symbol.replace('#', '').trim(),
+                result: result,
+                leverage: leverage ? `${leverage}x` : '',
+                status: result > 0 ? 'profit' : 'loss'
+            });
+        }
+    });
+    
+    return trades;
+}
+
+// Добавление сделок
+function addTradeData(year, month, category, trades) {
+    if (!data[year]) data[year] = {};
+    if (!data[year][month]) data[year][month] = {};
+    if (!data[year][month][category]) data[year][month][category] = { trades: [] };
+
+    if (Array.isArray(trades)) {
+        data[year][month][category].trades.push(...trades);
+    } else {
+        data[year][month][category].trades.push(trades);
+    }
+    
     saveData();
 }
 
-// Обновление существующей сделки
-function updateTradeData(year, month, category, index, tradeData) {
-    if (data[year]?.[month]?.[category]?.trades[index]) {
-        data[year][month][category].trades[index] = tradeData;
-        saveData();
-        return true;
+// Обновление сделки
+function updateTradeData(year, month, category, tradeId, updatedData) {
+    if (data[year]?.[month]?.[category]) {
+        const trades = data[year][month][category].trades;
+        const index = trades.findIndex(t => t.id === tradeId);
+        
+        if (index !== -1) {
+            trades[index] = { ...trades[index], ...updatedData };
+            saveData();
+            return true;
+        }
     }
     return false;
 }
 
 // Удаление сделки
-function deleteTradeData(year, month, category, index) {
-    if (data[year]?.[month]?.[category]?.trades[index]) {
-        data[year][month][category].trades.splice(index, 1);
+function deleteTradeData(year, month, category, tradeId) {
+    if (data[year]?.[month]?.[category]) {
+        const trades = data[year][month][category].trades;
+        data[year][month][category].trades = trades.filter(t => t.id !== tradeId);
         saveData();
         return true;
     }
@@ -73,7 +104,6 @@ function calculateStats(trades) {
     let totalLoss = 0;
     let profitCount = 0;
     let lossCount = 0;
-    let neutCount = 0;
     
     trades.forEach(trade => {
         if (trade.result > 0) {
@@ -82,98 +112,18 @@ function calculateStats(trades) {
         } else if (trade.result < 0) {
             totalLoss += Math.abs(trade.result);
             lossCount++;
-        } else {
-            neutCount++;
         }
     });
 
-    const total = trades.length;
-    
     return {
-        totalTrades: total,
+        totalTrades: trades.length,
         profitTrades: profitCount,
         lossTrades: lossCount,
-        neutralTrades: neutCount,
         totalProfit: totalProfit.toFixed(1),
         totalLoss: totalLoss.toFixed(1),
-        netProfit: (totalProfit - totalLoss).toFixed(1),
-        winRate: total > 0 ? ((profitCount / total) * 100).toFixed(1) : 0
+        winRate: trades.length > 0 ? ((profitCount / trades.length) * 100).toFixed(1) : 0
     };
 }
 
-// Парсинг массового ввода
-function parseTrades(text) {
-    const lines = text.split('\n').filter(line => line.trim());
-    let currentCategory = '';
-    let trades = [];
-    
-    lines.forEach(line => {
-        // Определение категории
-        if (line.includes('DEFI:') || line.includes('DeFi:')) {
-            currentCategory = 'DeFi';
-            return;
-        } else if (line.includes('FUTURES:')) {
-            currentCategory = 'FUTURES';
-            return;
-        } else if (line.includes('SPOT:')) {
-            currentCategory = 'SPOT';
-            return;
-        }
-
-        // Парсинг сделки
-        const tradeMatch = line.match(/\d+\.#(\w+)\s*([-+])\s*(\d+\.?\d*)%\s*(?:\((\d+)x\)?)?/);
-        
-        if (tradeMatch && currentCategory) {
-            const [_, symbol, sign, value, leverage] = tradeMatch;
-            const result = (sign === '+' ? 1 : -1) * parseFloat(value);
-            
-            trades.push({
-                pair: symbol,
-                result: result,
-                status: result > 0 ? 'profit' : (result < 0 ? 'loss' : 'neutral'),
-                leverage: leverage || '',
-                comment: leverage ? `(${leverage}x)` : '',
-                category: currentCategory
-            });
-        }
-    });
-
-    return trades;
-}
-
-// Экспорт данных
-function exportData() {
-    return {
-        data: JSON.stringify(data),
-        timestamp: new Date().toISOString()
-    };
-}
-
-// Импорт данных
-function importData(jsonData) {
-    try {
-        const importedData = JSON.parse(jsonData);
-        data = importedData;
-        saveData();
-        return true;
-    } catch (error) {
-        console.error('Ошибка импорта данных:', error);
-        return false;
-    }
-}
-
-// Очистка данных за период
-function clearPeriodData(year, month, category) {
-    if (data[year]?.[month]?.[category]) {
-        data[year][month][category].trades = [];
-        saveData();
-        return true;
-    }
-    return false;
-}
-
-// Инициализация при загрузке страницы
-document.addEventListener('DOMContentLoaded', () => {
-    loadData();
-    updateContent(); // Функция должна быть определена в main.js
-});
+// Инициализация
+document.addEventListener('DOMContentLoaded', loadData);
