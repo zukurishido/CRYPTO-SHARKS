@@ -1,4 +1,51 @@
-// Обновление контента при изменении фильтров
+// Инициализация основного контента
+function initializeContent() {
+    initializeFilters();
+    updateContent();
+}
+
+// Инициализация фильтров
+function initializeFilters() {
+    // Заполнение годов
+    const yearSelect = document.getElementById('yearSelect');
+    const years = ['2023', '2024', '2025', '2026', '2027', '2028', '2029', '2030'];
+    years.forEach(year => {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        yearSelect.appendChild(option);
+    });
+
+    // Заполнение месяцев
+    const monthSelect = document.getElementById('monthSelect');
+    const months = [
+        'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+        'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+    ];
+    months.forEach(month => {
+        const option = document.createElement('option');
+        option.value = month;
+        option.textContent = month;
+        monthSelect.appendChild(option);
+    });
+
+    // Заполнение категорий
+    const categorySelect = document.getElementById('categorySelect');
+    const categories = ['SPOT', 'FUTURES', 'DeFi'];
+    categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category;
+        categorySelect.appendChild(option);
+    });
+
+    // Добавление обработчиков событий
+    [yearSelect, monthSelect, categorySelect].forEach(select => {
+        select.addEventListener('change', updateContent);
+    });
+}
+
+// Обновление контента
 function updateContent() {
     const year = document.getElementById('yearSelect').value;
     const month = document.getElementById('monthSelect').value;
@@ -15,88 +62,49 @@ function updateContent() {
 function updateSummaryStats(stats) {
     const summaryStats = document.getElementById('summaryStats');
     summaryStats.innerHTML = `
-        <div class="stat-box fade-in delay-1">
-            <h3>Всего сделок</h3>
-            <div class="stat-value">${stats.totalTrades}</div>
+        <div class="bg-[#242830] rounded-xl p-6">
+            <h2 class="text-xl mb-2">Всего сделок</h2>
+            <p class="text-3xl font-bold text-[#00ff9d]">${stats.totalTrades}</p>
         </div>
-        <div class="stat-box fade-in delay-2">
-            <h3>Прибыльных</h3>
-            <div class="stat-value profit">+${stats.totalProfit}%</div>
+        <div class="bg-[#242830] rounded-xl p-6">
+            <h2 class="text-xl mb-2">Прибыльных</h2>
+            <p class="text-3xl font-bold text-[#00ff9d]">+${stats.totalProfit}%</p>
         </div>
-        <div class="stat-box fade-in delay-3">
-            <h3>Убыточных</h3>
-            <div class="stat-value loss">-${stats.totalLoss}%</div>
-        </div>
-        <div class="stat-box fade-in delay-4">
-            <h3>Winrate</h3>
-            <div class="stat-value">${stats.winRate}%</div>
+        <div class="bg-[#242830] rounded-xl p-6">
+            <h2 class="text-xl mb-2">Убыточных</h2>
+            <p class="text-3xl font-bold text-red-500">-${stats.totalLoss}%</p>
         </div>
     `;
 }
 
-// Обновление списка сделок
+// Обновление сетки сделок
 function updateTradesGrid(trades) {
-    const container = document.getElementById('tradesGrid');
-    container.innerHTML = '';
+    const tradesGrid = document.getElementById('tradesGrid');
+    tradesGrid.innerHTML = '';
 
     trades.forEach((trade, index) => {
-        const card = createTradeCard(trade, index);
-        container.appendChild(card);
-    });
-}
+        const card = document.createElement('div');
+        card.className = `trade-card ${trade.status} fade-in`;
+        card.style.animationDelay = `${index * 0.1}s`;
 
-// Создание карточки сделки с анимацией
-function createTradeCard(trade, index) {
-    const card = document.createElement('div');
-    card.className = `trade-card ${trade.status}`;
-    
-    card.innerHTML = `
-        <div class="active-glow"></div>
-        <div class="trade-header">
-            <div class="trade-pair">
-                <div class="pair-icon">
-                    ${trade.result > 0 ? 
-                        '<i class="lucide lucide-trending-up"></i>' : 
-                        (trade.result < 0 ? 
-                            '<i class="lucide lucide-trending-down"></i>' : 
-                            '<i class="lucide lucide-minus"></i>')}
+        const progressWidth = Math.min(Math.abs(trade.result) * 1.5, 100);
+        
+        card.innerHTML = `
+            <div class="flex justify-between items-center mb-4">
+                <div class="text-lg font-medium">#${trade.pair}</div>
+                <div class="text-lg ${trade.result > 0 ? 'text-[#00ff9d]' : 'text-red-500'}">
+                    ${trade.result > 0 ? '+' : ''}${trade.result}%
+                    ${trade.leverage ? `(${trade.leverage})` : ''}
                 </div>
-                <div class="pair-name">#${trade.pair}</div>
             </div>
-            <div class="trade-result">
-                ${trade.result > 0 ? '+' : ''}${trade.result}%
-                ${trade.leverage ? ` (${trade.leverage})` : ''}
+            <div class="h-1 bg-[#1a1d24] rounded-full overflow-hidden">
+                <div class="progress-bar" style="width: ${progressWidth}%"></div>
             </div>
-        </div>
-        <div class="progress-container">
-            <div class="progress-bar" style="width: 0%">
-                <div class="progress-shine"></div>
-            </div>
-        </div>
-        ${trade.comment ? `<div class="trade-comment">${trade.comment}</div>` : ''}
-    `;
+        `;
 
-    // Эффект свечения при наведении
-    card.addEventListener('mousemove', (e) => {
-        const rect = card.getBoundingClientRect();
-        const x = ((e.clientX - rect.left) / rect.width) * 100;
-        const y = ((e.clientY - rect.top) / rect.height) * 100;
-        card.style.setProperty('--x', `${x}%`);
-        card.style.setProperty('--y', `${y}%`);
+        tradesGrid.appendChild(card);
     });
-
-    // Анимация появления
-    setTimeout(() => {
-        card.classList.add('visible');
-        const progressBar = card.querySelector('.progress-bar');
-        const width = Math.min(Math.abs(trade.result) * 1.5, 100);
-        progressBar.style.width = `${width}%`;
-    }, index * 100);
-
-    return card;
 }
 
-// Инициализация
-document.addEventListener('DOMContentLoaded', () => {
-    updateContent();
-});
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', initializeContent);
