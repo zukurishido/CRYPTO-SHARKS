@@ -1,154 +1,140 @@
-// Управление состоянием админ-панели
-let isAuthenticated = false;
+// Состояние админ-панели
 let isAdminPanelVisible = false;
+let isAuthenticated = false;
 
-// Функции для работы с паролем в localStorage
-function setAdminPassword(password) {
-    const hashedPassword = btoa(password); // Простое кодирование
-    localStorage.setItem('adminHash', hashedPassword);
+// Инициализация админ-панели
+function initializeAdminPanel() {
+    const adminButton = document.getElementById('adminButton');
+    const closeAdmin = document.getElementById('closeAdmin');
+    const adminPanel = document.getElementById('adminPanel');
+
+    adminButton.addEventListener('click', () => {
+        if (!isAuthenticated) {
+            showLoginForm();
+        } else {
+            toggleAdminPanel();
+        }
+    });
+
+    closeAdmin.addEventListener('click', () => {
+        toggleAdminPanel();
+    });
 }
 
-function checkAdminPassword(password) {
-    const hashedPassword = localStorage.getItem('adminHash');
-    return hashedPassword === btoa(password);
-}
-
-// Инициализация пароля при первом запуске
-function initializeAdminPassword() {
-    if (!localStorage.getItem('adminHash')) {
-        setAdminPassword('Cr5pt0Sh@rks2024#AdminP@nel');
+// Переключение видимости админ-панели
+function toggleAdminPanel() {
+    const adminPanel = document.getElementById('adminPanel');
+    isAdminPanelVisible = !isAdminPanelVisible;
+    adminPanel.classList.toggle('visible');
+    
+    if (isAdminPanelVisible && isAuthenticated) {
+        showAdminContent();
     }
+}
+
+// Показ формы входа
+function showLoginForm() {
+    const adminContent = document.getElementById('adminContent');
+    adminContent.innerHTML = `
+        <div class="space-y-4">
+            <input type="password" 
+                   id="adminPassword" 
+                   placeholder="Введите пароль" 
+                   class="w-full px-4 py-2 bg-[#1a1d24] border border-[#00ff9d] rounded-lg text-white">
+            <button onclick="login()" 
+                    class="w-full px-6 py-2 bg-[#00ff9d] text-[#1a1d24] rounded-lg">
+                Войти
+            </button>
+        </div>
+    `;
+    toggleAdminPanel();
+}
+
+// Вход в админ-панель
+function login() {
+    const password = document.getElementById('adminPassword').value;
+    if (password === 'admin123') { // Замените на реальный пароль
+        isAuthenticated = true;
+        showAdminContent();
+        showNotification('Вход выполнен успешно', 'success');
+    } else {
+        showNotification('Неверный пароль', 'error');
+    }
+}
+
+// Показ контента админ-панели
+function showAdminContent() {
+    const adminContent = document.getElementById('adminContent');
+    adminContent.innerHTML = `
+        <div class="space-y-6">
+            <div class="flex space-x-4">
+                <button onclick="showBulkInput()" 
+                        class="flex-1 px-4 py-2 bg-[#1a1d24] border border-[#00ff9d] rounded-lg text-white hover:bg-[#2a2f38]">
+                    Массовое добавление
+                </button>
+                <button onclick="showSingleInput()" 
+                        class="flex-1 px-4 py-2 bg-[#1a1d24] border border-[#00ff9d] rounded-lg text-white hover:bg-[#2a2f38]">
+                    Одиночное добавление
+                </button>
+            </div>
+            <div id="inputForm"></div>
+        </div>
+    `;
 }
 
 // Показ формы массового добавления
 function showBulkInput() {
-    document.querySelector('.admin-form').innerHTML = `
-        <div class="input-group fade-in">
-            <label>Массовое добавление сделок</label>
-            <textarea id="bulkInput" rows="15" placeholder="DEFI:🚀
-1.#FIT +20%
-2.#AMT +22%
-
-FUTURES:🚀
-1.#BNB +35% (5х)
-2.#CELO +76% (20х)
-
-SPOT:🚀
-1.#TWT +35%
-2.#NEAR -15%"></textarea>
-            <button onclick="parseBulkTrades()" class="add-btn">
-                <i class="lucide lucide-plus-circle"></i>
-                Добавить все сделки
+    const inputForm = document.getElementById('inputForm');
+    inputForm.innerHTML = `
+        <div class="space-y-4">
+            <textarea id="bulkInput" 
+                      rows="10" 
+                      placeholder="Примеры форматов:
+#BTC +55%
+ETH -12%
+SOL +33% (10x)
+DOT +25%" 
+                      class="w-full p-4 bg-[#1a1d24] border border-[#00ff9d] rounded-lg text-white"></textarea>
+            <button onclick="processBulkInput()" 
+                    class="w-full px-6 py-2 bg-[#00ff9d] text-[#1a1d24] rounded-lg">
+                Добавить сделки
             </button>
         </div>
     `;
-
-    // Анимируем появление
-    gsap.from('.input-group', {
-        opacity: 0,
-        y: 20,
-        duration: 0.5,
-        ease: 'power2.out'
-    });
 }
 
-// Функция массового добавления сделок
-function parseBulkTrades() {
-    const bulkText = document.getElementById('bulkInput').value;
-    const trades = parseTrades(bulkText); // Функция из data.js
-
-    if (trades.length === 0) {
-        showNotification('Не найдено сделок для добавления', 'error');
-        return;
-    }
-
-    // Группируем сделки по категориям для статистики
-    const stats = trades.reduce((acc, trade) => {
-        const cat = trade.category;
-        if (!acc[cat]) {
-            acc[cat] = { count: 0, profit: 0, loss: 0 };
-        }
-        acc[cat].count++;
-        if (trade.result > 0) acc[cat].profit += trade.result;
-        if (trade.result < 0) acc[cat].loss += Math.abs(trade.result);
-        return acc;
-    }, {});
-
-    // Формируем текст подтверждения
-    let confirmText = 'Найдены сделки:\n\n';
-    Object.entries(stats).forEach(([category, stat]) => {
-        confirmText += `${category}:\n`;
-        confirmText += `Количество: ${stat.count}\n`;
-        if (stat.profit > 0) confirmText += `Прибыль: +${stat.profit.toFixed(1)}%\n`;
-        if (stat.loss > 0) confirmText += `Убыток: -${stat.loss.toFixed(1)}%\n`;
-        confirmText += '\n';
-    });
-
-    if (confirm(confirmText)) {
-        const year = document.getElementById('yearSelect').value;
-        const month = document.getElementById('monthSelect').value;
-
-        // Добавляем сделки с анимацией
-        trades.forEach((trade, index) => {
-            setTimeout(() => {
-                addTradeData(year, month, trade.category, trade);
-                if (index === trades.length - 1) {
-                    updateContent();
-                    showNotification(`Добавлено ${trades.length} сделок`, 'success');
-                }
-            }, index * 100);
-        });
-    }
-}
-
-// Показ обычной формы добавления
-function showRegularForm() {
-    document.querySelector('.admin-form').innerHTML = `
-        <div class="form-content fade-in">
-            <div class="input-group">
-                <label>Пара</label>
-                <input type="text" id="pairInput" placeholder="Например: BTC">
-            </div>
-            <div class="input-group">
-                <label>Результат (%)</label>
-                <input type="number" id="resultInput" step="0.01">
-            </div>
-            <div class="input-group">
-                <label>Статус</label>
-                <select id="statusInput">
-                    <option value="profit">Прибыль</option>
-                    <option value="loss">Убыток</option>
-                    <option value="neutral">В работе</option>
-                </select>
-            </div>
-            <div class="input-group">
-                <label>Кратность (для FUTURES)</label>
-                <input type="text" id="leverageInput" placeholder="Например: 20x">
-            </div>
-            <div class="input-group">
-                <label>Комментарий</label>
-                <textarea id="commentInput" rows="2"></textarea>
-            </div>
-            <div class="button-group">
-                <button onclick="addSingleTrade()" class="add-btn">Добавить сделку</button>
-                <button onclick="showBulkInput()" class="secondary-btn">Массовое добавление</button>
-            </div>
+// Показ формы одиночного добавления
+function showSingleInput() {
+    const inputForm = document.getElementById('inputForm');
+    inputForm.innerHTML = `
+        <div class="space-y-4">
+            <input type="text" 
+                   id="pairInput" 
+                   placeholder="Пара (например: BTC)" 
+                   class="w-full px-4 py-2 bg-[#1a1d24] border border-[#00ff9d] rounded-lg text-white">
+            <input type="number" 
+                   id="resultInput" 
+                   placeholder="Результат в % (например: 55 или -12)" 
+                   class="w-full px-4 py-2 bg-[#1a1d24] border border-[#00ff9d] rounded-lg text-white">
+            <input type="text" 
+                   id="leverageInput" 
+                   placeholder="Кратность (например: 10x)" 
+                   class="w-full px-4 py-2 bg-[#1a1d24] border border-[#00ff9d] rounded-lg text-white">
+            <button onclick="processSingleInput()" 
+                    class="w-full px-6 py-2 bg-[#00ff9d] text-[#1a1d24] rounded-lg">
+                Добавить сделку
+            </button>
         </div>
     `;
 }
 
-// Добавление одиночной сделки
-function addSingleTrade() {
-    const trade = {
-        pair: document.getElementById('pairInput').value,
-        result: Number(document.getElementById('resultInput').value),
-        status: document.getElementById('statusInput').value,
-        leverage: document.getElementById('leverageInput').value,
-        comment: document.getElementById('commentInput').value
-    };
-
-    if (!trade.pair || isNaN(trade.result)) {
-        showNotification('Заполните обязательные поля', 'error');
+// Обработка массового ввода
+function processBulkInput() {
+    const text = document.getElementById('bulkInput').value;
+    const trades = parseTradesFlexible(text);
+    
+    if (trades.length === 0) {
+        showNotification('Не удалось распознать сделки', 'error');
         return;
     }
 
@@ -156,171 +142,59 @@ function addSingleTrade() {
     const month = document.getElementById('monthSelect').value;
     const category = document.getElementById('categorySelect').value;
 
-    addTradeData(year, month, category, trade);
+    addTradeData(year, month, category, trades);
     updateContent();
-    showNotification('Сделка добавлена', 'success');
-    clearForm();
+    
+    document.getElementById('bulkInput').value = '';
+    showNotification(`Добавлено ${trades.length} сделок`, 'success');
 }
 
-// Показ списка сделок для редактирования
-function showTradesList() {
-    const year = document.getElementById('yearSelect').value;
-    const month = document.getElementById('monthSelect').value;
-    const categories = ['SPOT', 'FUTURES', 'DeFi'];
-    
-    let html = '<div class="trades-list">';
-    
-    categories.forEach(category => {
-        const trades = getPeriodData(year, month, category);
-        if (trades.length > 0) {
-            html += `
-                <div class="category-section fade-in">
-                    <h3>${category}</h3>
-                    <div class="trades-grid">
-            `;
-            
-            trades.forEach((trade, index) => {
-                html += `
-                    <div class="trade-item ${trade.status}">
-                        <div class="trade-content">
-                            <div class="trade-pair">${trade.pair}</div>
-                            <div class="trade-result">
-                                ${trade.result > 0 ? '+' : ''}${trade.result}% 
-                                ${trade.leverage ? `(${trade.leverage})` : ''}
-                            </div>
-                        </div>
-                        <div class="trade-actions">
-                            <button onclick="editTrade('${year}', '${month}', '${category}', ${index})" 
-                                    class="edit-btn" title="Редактировать">
-                                <i class="lucide lucide-edit"></i>
-                            </button>
-                            <button onclick="deleteTrade('${year}', '${month}', '${category}', ${index})" 
-                                    class="delete-btn" title="Удалить">
-                                <i class="lucide lucide-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            html += `
-                    </div>
-                </div>
-            `;
-        }
-    });
-    
-    html += '</div>';
-    
-    document.querySelector('.admin-form').innerHTML = html;
+// Обработка одиночного ввода
+function processSingleInput() {
+    const pair = document.getElementById('pairInput').value;
+    const result = parseFloat(document.getElementById('resultInput').value);
+    const leverage = document.getElementById('leverageInput').value;
 
-    // Анимируем появление списка
-    gsap.from('.category-section', {
-        opacity: 0,
-        y: 20,
-        duration: 0.5,
-        stagger: 0.1,
-        ease: 'power2.out'
-    });
-}
+    if (!pair || isNaN(result)) {
+        showNotification('Заполните обязательные поля', 'error');
+        return;
+    }
 
-// Редактирование сделки
-function editTrade(year, month, category, index) {
-    const trades = getPeriodData(year, month, category);
-    const trade = trades[index];
-    
-    document.querySelector('.admin-form').innerHTML = `
-        <div class="edit-form fade-in">
-            <h3>Редактирование сделки</h3>
-            <div class="input-group">
-                <label>Пара</label>
-                <input type="text" id="editPair" value="${trade.pair}">
-            </div>
-            <div class="input-group">
-                <label>Результат (%)</label>
-                <input type="number" id="editResult" value="${trade.result}" step="0.01">
-            </div>
-            <div class="input-group">
-                <label>Статус</label>
-                <select id="editStatus">
-                    <option value="profit" ${trade.status === 'profit' ? 'selected' : ''}>Прибыль</option>
-                    <option value="loss" ${trade.status === 'loss' ? 'selected' : ''}>Убыток</option>
-                    <option value="neutral" ${trade.status === 'neutral' ? 'selected' : ''}>В работе</option>
-                </select>
-            </div>
-            <div class="input-group">
-                <label>Кратность</label>
-                <input type="text" id="editLeverage" value="${trade.leverage || ''}">
-            </div>
-            <div class="input-group">
-                <label>Комментарий</label>
-                <textarea id="editComment">${trade.comment || ''}</textarea>
-            </div>
-            <div class="button-group">
-                <button onclick="saveTrade('${year}', '${month}', '${category}', ${index})" class="save-btn">
-                    <i class="lucide lucide-save"></i> Сохранить
-                </button>
-                <button onclick="showTradesList()" class="cancel-btn">
-                    <i class="lucide lucide-x"></i> Отмена
-                </button>
-            </div>
-        </div>
-    `;
-}
-
-// Сохранение отредактированной сделки
-function saveTrade(year, month, category, index) {
-    const updatedTrade = {
-        pair: document.getElementById('editPair').value,
-        result: parseFloat(document.getElementById('editResult').value),
-        status: document.getElementById('editStatus').value,
-        leverage: document.getElementById('editLeverage').value,
-        comment: document.getElementById('editComment').value
+    const trade = {
+        id: Date.now(),
+        pair: pair,
+        result: result,
+        leverage: leverage ? `${leverage}` : '',
+        status: result > 0 ? 'profit' : 'loss'
     };
 
-    if (updateTradeData(year, month, category, index, updatedTrade)) {
-        showNotification('Сделка обновлена', 'success');
-        showTradesList();
-        updateContent();
-    } else {
-        showNotification('Ошибка при обновлении', 'error');
-    }
+    const year = document.getElementById('yearSelect').value;
+    const month = document.getElementById('monthSelect').value;
+    const category = document.getElementById('categorySelect').value;
+
+    addTradeData(year, month, category, trade);
+    updateContent();
+
+    // Очистка формы
+    document.getElementById('pairInput').value = '';
+    document.getElementById('resultInput').value = '';
+    document.getElementById('leverageInput').value = '';
+    
+    showNotification('Сделка добавлена', 'success');
 }
 
-// Удаление сделки
-function deleteTrade(year, month, category, index) {
-    if (confirm('Удалить эту сделку?')) {
-        if (deleteTradeData(year, month, category, index)) {
-            showNotification('Сделка удалена', 'success');
-            showTradesList();
-            updateContent();
-        } else {
-            showNotification('Ошибка при удалении', 'error');
-        }
-    }
-}
-
-// Уведомления
+// Показ уведомлений
 function showNotification(message, type = 'success') {
     const notification = document.createElement('div');
     notification.className = `notification ${type} fade-in`;
-    notification.innerHTML = `
-        <i class="lucide lucide-${type === 'success' ? 'check-circle' : 'alert-circle'}"></i>
-        <span>${message}</span>
-    `;
+    notification.textContent = message;
     
     document.body.appendChild(notification);
 
-    gsap.to(notification, {
-        opacity: 0,
-        y: -20,
-        duration: 0.3,
-        delay: 2,
-        onComplete: () => notification.remove()
-    });
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
 }
 
-// Инициализация
-document.addEventListener('DOMContentLoaded', () => {
-    initializeAdminPassword();
-});
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', initializeAdminPanel);
