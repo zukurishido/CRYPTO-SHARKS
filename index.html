@@ -4,17 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRYPTO SHARKS</title>
-    <link rel="stylesheet" href="main.css">
-    <link rel="stylesheet" href="admin.css">
+    
+    <!-- Стили -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/sync-styles.css">
 </head>
 <body>
     <div class="container mx-auto px-4 py-6">
-        <header>
-            <div class="logo-section">
-                <h1 id="crypto-sharks" class="title">CRYPTO SHARKS</h1>
-            </div>
-        </header>
+        <!-- Шапка -->
+        <div class="header">
+            <h1 class="title">CRYPTO SHARKS</h1>
+            <button id="adminButton" class="admin-btn">Админ панель</button>
+        </div>
 
+        <!-- Фильтры -->
         <div id="filters" class="filters">
             <select id="yearSelect" class="filter-select">
                 <option value="2023">2023</option>
@@ -41,7 +46,7 @@
                 <option value="Ноябрь">Ноябрь</option>
                 <option value="Декабрь">Декабрь</option>
             </select>
-
+            
             <select id="categorySelect" class="filter-select">
                 <option value="SPOT">SPOT</option>
                 <option value="FUTURES">FUTURES</option>
@@ -49,29 +54,38 @@
             </select>
         </div>
 
-        <div id="summaryStats" class="summary-stats">
-            <!-- Статистика будет добавлена динамически -->
-        </div>
+        <!-- Статистика -->
+        <div id="summaryStats" class="summary-stats"></div>
 
+        <!-- Контейнер сделок -->
         <div id="statsContainer" class="stats-container">
-            <div id="tradesGrid" class="trades-grid">
-                <!-- Сделки будут добавлены динамически -->
-            </div>
+            <div id="tradesGrid" class="trades-grid"></div>
         </div>
     </div>
 
+    <!-- Админ панель -->
     <div id="adminPanel" class="admin-panel">
         <div class="admin-header">
             <h2>Админ панель</h2>
-            <button id="closeAdmin">✕</button>
+            <button id="closeAdmin" class="close-btn">✕</button>
         </div>
-        <div class="admin-form">
-            <!-- Форма админа будет добавлена динамически -->
-        </div>
+        <div class="admin-form"></div>
     </div>
 
-    <script src="data.js"></script>
-    <script src="admin.js"></script>
-    <script src="main.js"></script>
+    <!-- Конфигурация JSONBin -->
+    <script>
+        const SYNC_CONFIG = {
+            binId: '673607eeacd3cb34a8a8912b',
+            key: '$2a$10$ZyhJn3sHuiHpDJCn.I0B9.ynZDnNdcqrb3JuhEw9eEWvF4ADsoigi'
+        };
+    </script>
+
+    <!-- Индикатор синхронизации -->
+    <div id="syncStatus"></div>
+
+    <!-- Скрипты -->
+    <script src="js/data.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>
