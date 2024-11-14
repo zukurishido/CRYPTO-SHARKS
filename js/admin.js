@@ -79,8 +79,6 @@ function showBulkInput() {
     if (!checkAuth()) return;
 
     document.querySelector('.admin-form').innerHTML = `
-        <h3 class="text-[#00ff9d] text-xl mb-4">Массовое добавление сделок</h3>
-        
         <div class="mode-switcher mb-4">
             <button onclick="showBulkInput()" class="mode-btn active">Массовое добавление</button>
             <button onclick="showRegularForm()" class="mode-btn">Одиночное добавление</button>
@@ -88,6 +86,7 @@ function showBulkInput() {
         </div>
 
         <div class="input-group">
+            <label>Массовое добавление сделок</label>
             <textarea id="bulkInput" placeholder="Поддерживаемые форматы:
 
 SPOT:
@@ -115,8 +114,6 @@ function showRegularForm() {
     if (!checkAuth()) return;
 
     document.querySelector('.admin-form').innerHTML = `
-        <h3 class="text-[#00ff9d] text-xl mb-4">Одиночное добавление</h3>
-        
         <div class="mode-switcher mb-4">
             <button onclick="showBulkInput()" class="mode-btn">Массовое добавление</button>
             <button onclick="showRegularForm()" class="mode-btn active">Одиночное добавление</button>
@@ -151,20 +148,10 @@ function showTradesList() {
     const trades = getPeriodData(year, month, category);
     
     let html = `
-        <h3 class="text-[#00ff9d] text-xl mb-4">Управление сделками</h3>
-        
         <div class="mode-switcher mb-4">
             <button onclick="showBulkInput()" class="mode-btn">Массовое добавление</button>
             <button onclick="showRegularForm()" class="mode-btn">Одиночное добавление</button>
             <button onclick="showTradesList()" class="mode-btn active">Управление сделками</button>
-        </div>
-    `;
-
-    // Отображение текущего периода
-    html += `
-        <div class="current-period mb-4 p-3 rounded bg-[#1e293b]">
-            <p>Период: ${month} ${year}</p>
-            <p>Категория: ${category}</p>
         </div>
     `;
     
@@ -182,11 +169,9 @@ function showTradesList() {
                     <div class="trade-content">
                         <span style="color: ${resultColor}">#${trade.pair} ${resultText}</span>
                     </div>
-                    <div class="trade-actions">
-                        <button onclick="confirmDelete('${year}', '${month}', '${category}', ${index})" class="delete-btn">
-                            Удалить
-                        </button>
-                    </div>
+                    <button onclick="confirmDelete('${year}', '${month}', '${category}', ${index})" class="delete-btn">
+                        Удалить
+                    </button>
                 </div>
             `;
         });
@@ -202,16 +187,11 @@ function confirmDelete(year, month, category, index) {
     if (!checkAuth()) return;
 
     if (confirm('Удалить эту сделку?')) {
-        try {
-            if (deleteTradeData(year, month, category, index)) {
-                showNotification('Сделка удалена', 'success');
-                showTradesList();
-                updateContent();
-            } else {
-                throw new Error('Не удалось удалить сделку');
-            }
-        } catch (error) {
-            console.error('Ошибка при удалении:', error);
+        if (deleteTradeData(year, month, category, index)) {
+            showNotification('Сделка удалена', 'success');
+            showTradesList();
+            updateContent();
+        } else {
             showNotification('Ошибка при удалении', 'error');
         }
     }
@@ -254,7 +234,6 @@ function processSingleTrade() {
     }
 
     const trade = {
-        id: Date.now(),
         pair: pair.toUpperCase(),
         result: result,
         leverage: leverage ? leverage : '',
