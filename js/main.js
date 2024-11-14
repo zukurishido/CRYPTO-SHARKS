@@ -1,50 +1,3 @@
-// Инициализация основного контента
-function initializeContent() {
-    initializeFilters();
-    updateContent();
-}
-
-// Инициализация фильтров
-function initializeFilters() {
-    // Заполнение годов
-    const yearSelect = document.getElementById('yearSelect');
-    const years = ['2023', '2024', '2025', '2026', '2027', '2028', '2029', '2030'];
-    years.forEach(year => {
-        const option = document.createElement('option');
-        option.value = year;
-        option.textContent = year;
-        yearSelect.appendChild(option);
-    });
-
-    // Заполнение месяцев
-    const monthSelect = document.getElementById('monthSelect');
-    const months = [
-        'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
-        'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
-    ];
-    months.forEach(month => {
-        const option = document.createElement('option');
-        option.value = month;
-        option.textContent = month;
-        monthSelect.appendChild(option);
-    });
-
-    // Заполнение категорий
-    const categorySelect = document.getElementById('categorySelect');
-    const categories = ['SPOT', 'FUTURES', 'DeFi'];
-    categories.forEach(category => {
-        const option = document.createElement('option');
-        option.value = category;
-        option.textContent = category;
-        categorySelect.appendChild(option);
-    });
-
-    // Добавление обработчиков событий
-    [yearSelect, monthSelect, categorySelect].forEach(select => {
-        select.addEventListener('change', updateContent);
-    });
-}
-
 // Обновление контента
 function updateContent() {
     const year = document.getElementById('yearSelect').value;
@@ -61,50 +14,186 @@ function updateContent() {
 // Обновление статистики
 function updateSummaryStats(stats) {
     const summaryStats = document.getElementById('summaryStats');
+    
+    if (!summaryStats) return;
+
+    let profitClass = stats.totalProfit > 0 ? 'profit' : '';
+    let lossClass = stats.totalLoss > 0 ? 'loss' : '';
+
     summaryStats.innerHTML = `
-        <div class="bg-[#242830] rounded-xl p-6">
-            <h2 class="text-xl mb-2">Всего сделок</h2>
-            <p class="text-3xl font-bold text-[#00ff9d]">${stats.totalTrades}</p>
+        <div class="stat-box fade-in delay-1">
+            <h3>Всего сделок</h3>
+            <div class="stat-value">
+                ${stats.totalTrades}
+                <small class="stat-subtitle">${stats.winRate}% успешных</small>
+            </div>
         </div>
-        <div class="bg-[#242830] rounded-xl p-6">
-            <h2 class="text-xl mb-2">Прибыльных</h2>
-            <p class="text-3xl font-bold text-[#00ff9d]">+${stats.totalProfit}%</p>
+        <div class="stat-box fade-in delay-2">
+            <h3>Прибыльных</h3>
+            <div class="stat-value ${profitClass}">
+                +${stats.totalProfit}%
+                <small class="stat-subtitle">${stats.profitTrades} сделок</small>
+            </div>
         </div>
-        <div class="bg-[#242830] rounded-xl p-6">
-            <h2 class="text-xl mb-2">Убыточных</h2>
-            <p class="text-3xl font-bold text-red-500">-${stats.totalLoss}%</p>
+        <div class="stat-box fade-in delay-3">
+            <h3>Убыточных</h3>
+            <div class="stat-value ${lossClass}">
+                -${stats.totalLoss}%
+                <small class="stat-subtitle">${stats.lossTrades} сделок</small>
+            </div>
         </div>
     `;
 }
 
 // Обновление сетки сделок
 function updateTradesGrid(trades) {
-    const tradesGrid = document.getElementById('tradesGrid');
-    tradesGrid.innerHTML = '';
+    const container = document.getElementById('tradesGrid');
+    
+    if (!container) return;
+    
+    container.innerHTML = '';
 
-    trades.forEach((trade, index) => {
+    if (trades.length === 0) {
+        container.innerHTML = `
+            <div class="no-trades fade-in">
+                <p class="text-center text-gray-500">Нет сделок за выбранный период</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Сортировка сделок: сперва прибыльные, потом убыточные
+    const sortedTrades = [...trades].sort((a, b) => b.result - a.result);
+
+    sortedTrades.forEach((trade, index) => {
         const card = document.createElement('div');
         card.className = `trade-card ${trade.status} fade-in`;
         card.style.animationDelay = `${index * 0.1}s`;
 
+        // Расчет ширины прогресс-бара
         const progressWidth = Math.min(Math.abs(trade.result) * 1.5, 100);
         
+        // Определение иконки и цвета
+        const icon = trade.result > 0 ? '↗' : '↘';
+        const resultClass = trade.result > 0 ? 'profit' : 'loss';
+        const timestamp = new Date(trade.timestamp).toLocaleString();
+        
         card.innerHTML = `
-            <div class="flex justify-between items-center mb-4">
-                <div class="text-lg font-medium">#${trade.pair}</div>
-                <div class="text-lg ${trade.result > 0 ? 'text-[#00ff9d]' : 'text-red-500'}">
+            <div class="trade-header">
+                <div class="trade-pair">
+                    <span class="trade-icon ${resultClass}">${icon}</span>
+                    <span class="pair-name">#${trade.pair}</span>
+                </div>
+                <div class="trade-result ${resultClass}">
                     ${trade.result > 0 ? '+' : ''}${trade.result}%
-                    ${trade.leverage ? `(${trade.leverage})` : ''}
+                    ${trade.leverage ? `<span class="leverage">(${trade.leverage})</span>` : ''}
                 </div>
             </div>
-            <div class="h-1 bg-[#1a1d24] rounded-full overflow-hidden">
-                <div class="progress-bar" style="width: ${progressWidth}%"></div>
+            <div class="progress-container">
+                <div class="progress-bar" style="width: ${progressWidth}%">
+                    <div class="progress-shine"></div>
+                </div>
+            </div>
+            <div class="trade-info">
+                <small class="trade-timestamp">${timestamp}</small>
             </div>
         `;
 
-        tradesGrid.appendChild(card);
+        // Добавляем эффект свечения при наведении
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            card.style.setProperty('--x', `${x}%`);
+            card.style.setProperty('--y', `${y}%`);
+        });
+
+        container.appendChild(card);
+    });
+
+    // Добавляем анимацию появления
+    container.querySelectorAll('.trade-card').forEach((card, index) => {
+        setTimeout(() => card.classList.add('visible'), index * 100);
     });
 }
 
-// Инициализация при загрузке страницы
-document.addEventListener('DOMContentLoaded', initializeContent);
+// Инициализация фильтров
+function initializeFilters() {
+    const yearSelect = document.getElementById('yearSelect');
+    const monthSelect = document.getElementById('monthSelect');
+
+    // Установка текущего года и месяца
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear().toString();
+    const months = [
+        'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+        'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+    ];
+    const currentMonth = months[currentDate.getMonth()];
+
+    if (yearSelect && monthSelect) {
+        yearSelect.value = currentYear;
+        monthSelect.value = currentMonth;
+
+        // Добавление обработчиков событий
+        document.querySelectorAll('.filter-select').forEach(select => {
+            select.addEventListener('change', () => {
+                const statsContainer = document.getElementById('statsContainer');
+                if (statsContainer) {
+                    statsContainer.classList.add('updating');
+                }
+                
+                updateContent();
+                
+                setTimeout(() => {
+                    if (statsContainer) {
+                        statsContainer.classList.remove('updating');
+                    }
+                }, 500);
+            });
+        });
+    }
+}
+
+// Форматирование чисел
+function formatNumber(number) {
+    return new Intl.NumberFormat('ru-RU', {
+        maximumFractionDigits: 2,
+        minimumFractionDigits: 2
+    }).format(number);
+}
+
+// Проверка состояния авторизации
+function checkAuthState() {
+    if (window.isAuthenticated) {
+        document.body.classList.add('is-admin');
+    } else {
+        document.body.classList.remove('is-admin');
+    }
+}
+
+// Инициализация приложения
+function initializeApp() {
+    loadData();
+    initializeFilters();
+    updateContent();
+    checkAuthState();
+
+    // Обновление при изменении данных в других вкладках
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'cryptoSharksData') {
+            loadData();
+            updateContent();
+        }
+    });
+
+    // Добавляем слушатель для обновления при изменении размера окна
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(updateContent, 100);
+    });
+}
+
+// Запуск приложения
+document.addEventListener('DOMContentLoaded', initializeApp);
