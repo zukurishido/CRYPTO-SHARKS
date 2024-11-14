@@ -17,30 +17,18 @@ function updateSummaryStats(stats) {
     
     if (!summaryStats) return;
 
-    let profitClass = stats.totalProfit > 0 ? 'profit' : '';
-    let lossClass = stats.totalLoss > 0 ? 'loss' : '';
-
     summaryStats.innerHTML = `
-        <div class="stat-box fade-in delay-1">
+        <div class="stat-box fade-in">
             <h3>Всего сделок</h3>
-            <div class="stat-value">
-                ${stats.totalTrades}
-                <small class="stat-subtitle">${stats.winRate}% успешных</small>
-            </div>
+            <div class="stat-value">${stats.totalTrades}</div>
         </div>
-        <div class="stat-box fade-in delay-2">
+        <div class="stat-box fade-in">
             <h3>Прибыльных</h3>
-            <div class="stat-value ${profitClass}">
-                +${stats.totalProfit}%
-                <small class="stat-subtitle">${stats.profitTrades} сделок</small>
-            </div>
+            <div class="stat-value profit">+${stats.totalProfit}%</div>
         </div>
-        <div class="stat-box fade-in delay-3">
+        <div class="stat-box fade-in">
             <h3>Убыточных</h3>
-            <div class="stat-value ${lossClass}">
-                -${stats.totalLoss}%
-                <small class="stat-subtitle">${stats.lossTrades} сделок</small>
-            </div>
+            <div class="stat-value loss">-${stats.totalLoss}%</div>
         </div>
     `;
 }
@@ -62,58 +50,36 @@ function updateTradesGrid(trades) {
         return;
     }
 
-    // Сортировка сделок: сперва прибыльные, потом убыточные
     const sortedTrades = [...trades].sort((a, b) => b.result - a.result);
 
     sortedTrades.forEach((trade, index) => {
         const card = document.createElement('div');
-        card.className = `trade-card ${trade.status} fade-in`;
+        card.className = `trade-card fade-in`;
         card.style.animationDelay = `${index * 0.1}s`;
 
-        // Расчет ширины прогресс-бара
-        const progressWidth = Math.min(Math.abs(trade.result) * 1.5, 100);
-        
-        // Определение иконки и цвета
-        const icon = trade.result > 0 ? '↗' : '↘';
-        const resultClass = trade.result > 0 ? 'profit' : 'loss';
-        const timestamp = new Date(trade.timestamp).toLocaleString();
+        const isProfit = trade.result > 0;
+        const resultClass = isProfit ? 'profit-text' : 'loss-text';
+        const barColor = isProfit ? '#00ff9d' : '#ff4444';
         
         card.innerHTML = `
             <div class="trade-header">
                 <div class="trade-pair">
-                    <span class="trade-icon ${resultClass}">${icon}</span>
                     <span class="pair-name">#${trade.pair}</span>
                 </div>
                 <div class="trade-result ${resultClass}">
-                    ${trade.result > 0 ? '+' : ''}${trade.result}%
+                    ${isProfit ? '+' : ''}${trade.result}%
                     ${trade.leverage ? `<span class="leverage">(${trade.leverage})</span>` : ''}
                 </div>
             </div>
             <div class="progress-container">
-                <div class="progress-bar" style="width: ${progressWidth}%">
-                    <div class="progress-shine"></div>
+                <div class="progress-bar" 
+                     style="background: ${barColor}; 
+                            width: 100%;">
                 </div>
-            </div>
-            <div class="trade-info">
-                <small class="trade-timestamp">${timestamp}</small>
             </div>
         `;
 
-        // Добавляем эффект свечения при наведении
-        card.addEventListener('mousemove', (e) => {
-            const rect = card.getBoundingClientRect();
-            const x = ((e.clientX - rect.left) / rect.width) * 100;
-            const y = ((e.clientY - rect.top) / rect.height) * 100;
-            card.style.setProperty('--x', `${x}%`);
-            card.style.setProperty('--y', `${y}%`);
-        });
-
         container.appendChild(card);
-    });
-
-    // Добавляем анимацию появления
-    container.querySelectorAll('.trade-card').forEach((card, index) => {
-        setTimeout(() => card.classList.add('visible'), index * 100);
     });
 }
 
@@ -121,17 +87,17 @@ function updateTradesGrid(trades) {
 function initializeFilters() {
     const yearSelect = document.getElementById('yearSelect');
     const monthSelect = document.getElementById('monthSelect');
-
-    // Установка текущего года и месяца
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear().toString();
-    const months = [
-        'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
-        'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
-    ];
-    const currentMonth = months[currentDate.getMonth()];
-
+    
     if (yearSelect && monthSelect) {
+        // Установка текущего года и месяца
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear().toString();
+        const months = [
+            'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+            'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+        ];
+        const currentMonth = months[currentDate.getMonth()];
+
         yearSelect.value = currentYear;
         monthSelect.value = currentMonth;
 
@@ -163,21 +129,11 @@ function formatNumber(number) {
     }).format(number);
 }
 
-// Проверка состояния авторизации
-function checkAuthState() {
-    if (window.isAuthenticated) {
-        document.body.classList.add('is-admin');
-    } else {
-        document.body.classList.remove('is-admin');
-    }
-}
-
 // Инициализация приложения
 function initializeApp() {
     loadData();
     initializeFilters();
     updateContent();
-    checkAuthState();
 
     // Обновление при изменении данных в других вкладках
     window.addEventListener('storage', (e) => {
@@ -185,13 +141,6 @@ function initializeApp() {
             loadData();
             updateContent();
         }
-    });
-
-    // Добавляем слушатель для обновления при изменении размера окна
-    let resizeTimeout;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(updateContent, 100);
     });
 }
 
