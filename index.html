@@ -4,28 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRYPTO SHARKS</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/admin.css">
-    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="admin.css">
 </head>
-<body class="bg-[#0f172a]">
+<body>
     <div class="container mx-auto px-4 py-6">
-        <!-- Header -->
-        <header class="header">
+        <header>
             <div class="logo-section">
                 <h1 id="crypto-sharks" class="title">CRYPTO SHARKS</h1>
             </div>
-            <button id="adminButton" class="admin-btn">
-                Админ панель
-            </button>
         </header>
 
-        <!-- Filters -->
         <div id="filters" class="filters">
             <select id="yearSelect" class="filter-select">
                 <option value="2023">2023</option>
-                <option value="2024" selected>2024</option>
+                <option value="2024">2024</option>
                 <option value="2025">2025</option>
                 <option value="2026">2026</option>
                 <option value="2027">2027</option>
@@ -33,6 +26,7 @@
                 <option value="2029">2029</option>
                 <option value="2030">2030</option>
             </select>
+            
             <select id="monthSelect" class="filter-select">
                 <option value="Январь">Январь</option>
                 <option value="Февраль">Февраль</option>
@@ -47,6 +41,7 @@
                 <option value="Ноябрь">Ноябрь</option>
                 <option value="Декабрь">Декабрь</option>
             </select>
+
             <select id="categorySelect" class="filter-select">
                 <option value="SPOT">SPOT</option>
                 <option value="FUTURES">FUTURES</option>
@@ -54,39 +49,29 @@
             </select>
         </div>
 
-        <!-- Stats -->
         <div id="summaryStats" class="summary-stats">
-            <!-- Заполняется через JavaScript -->
+            <!-- Статистика будет добавлена динамически -->
         </div>
 
-        <!-- Trades Container -->
         <div id="statsContainer" class="stats-container">
             <div id="tradesGrid" class="trades-grid">
-                <!-- Заполняется через JavaScript -->
+                <!-- Сделки будут добавлены динамически -->
             </div>
         </div>
     </div>
 
-    <!-- Admin Panel -->
     <div id="adminPanel" class="admin-panel">
         <div class="admin-header">
             <h2>Админ панель</h2>
-            <button id="closeAdmin" class="close-btn">✕</button>
+            <button id="closeAdmin">✕</button>
         </div>
-
-        <div class="mode-switcher">
-            <button onclick="showBulkInput()" class="mode-btn">Массовое добавление</button>
-            <button onclick="showRegularForm()" class="mode-btn">Одиночное добавление</button>
-            <button onclick="showTradesList()" class="mode-btn">Управление сделками</button>
-        </div>
-
         <div class="admin-form">
-            <!-- Заполняется через JavaScript -->
+            <!-- Форма админа будет добавлена динамически -->
         </div>
     </div>
 
-    <script src="js/data.js"></script>
-    <script src="js/admin.js"></script>
-    <script src="js/main.js"></script>
+    <script src="data.js"></script>
+    <script src="admin.js"></script>
+    <script src="main.js"></script>
 </body>
 </html>
