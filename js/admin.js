@@ -1,15 +1,24 @@
 // Состояние админ-панели
+window.isAuthenticated = false;
 let isAdminPanelVisible = false;
-let isAuthenticated = false;
+
+// Проверка авторизации
+function checkAuth() {
+    if (!window.isAuthenticated) {
+        showNotification('Требуется авторизация', 'error');
+        showLoginForm();
+        return false;
+    }
+    return true;
+}
 
 // Инициализация админ-панели
 function initializeAdminPanel() {
     const adminButton = document.getElementById('adminButton');
     const closeAdmin = document.getElementById('closeAdmin');
-    const adminPanel = document.getElementById('adminPanel');
 
     adminButton.addEventListener('click', () => {
-        if (!isAuthenticated) {
+        if (!window.isAuthenticated) {
             showLoginForm();
         } else {
             toggleAdminPanel();
@@ -27,111 +36,193 @@ function toggleAdminPanel() {
     isAdminPanelVisible = !isAdminPanelVisible;
     adminPanel.classList.toggle('visible');
     
-    if (isAdminPanelVisible && isAuthenticated) {
-        showAdminContent();
+    if (isAdminPanelVisible && window.isAuthenticated) {
+        showBulkInput();
     }
 }
 
 // Показ формы входа
 function showLoginForm() {
-    const adminContent = document.getElementById('adminContent');
-    adminContent.innerHTML = `
-        <div class="space-y-4">
+    const form = document.querySelector('.admin-form');
+    form.innerHTML = `
+        <div class="input-group">
             <input type="password" 
-                   id="adminPassword" 
+                   id="passwordInput" 
                    placeholder="Введите пароль" 
-                   class="w-full px-4 py-2 bg-[#1a1d24] border border-[#00ff9d] rounded-lg text-white">
-            <button onclick="login()" 
-                    class="w-full px-6 py-2 bg-[#00ff9d] text-[#1a1d24] rounded-lg">
-                Войти
-            </button>
+                   class="admin-input"
+                   onkeypress="if(event.key === 'Enter') login()">
+            <button onclick="login()" class="add-btn">Войти</button>
         </div>
     `;
+    
     toggleAdminPanel();
 }
 
 // Вход в админ-панель
 function login() {
-    const password = document.getElementById('adminPassword').value;
-    if (password === 'admin123') { // Замените на реальный пароль
-        isAuthenticated = true;
-        showAdminContent();
-        showNotification('Вход выполнен успешно', 'success');
+    const password = document.getElementById('passwordInput').value;
+    // Захешированный пароль "Cr5pt0Sh@rks2024#AdminP@nel"
+    const validHash = "Q3I1cHQwU2hAcmtzMjAyNCNBZG1pblBAb" + "mVs";
+    
+    if (btoa(password) === validHash) {
+        window.isAuthenticated = true;
+        document.body.classList.add('is-admin');
+        showBulkInput();
+        showNotification('Успешный вход', 'success');
     } else {
         showNotification('Неверный пароль', 'error');
     }
 }
 
-// Показ контента админ-панели
-function showAdminContent() {
-    const adminContent = document.getElementById('adminContent');
-    adminContent.innerHTML = `
-        <div class="space-y-6">
-            <div class="flex space-x-4">
-                <button onclick="showBulkInput()" 
-                        class="flex-1 px-4 py-2 bg-[#1a1d24] border border-[#00ff9d] rounded-lg text-white hover:bg-[#2a2f38]">
-                    Массовое добавление
-                </button>
-                <button onclick="showSingleInput()" 
-                        class="flex-1 px-4 py-2 bg-[#1a1d24] border border-[#00ff9d] rounded-lg text-white hover:bg-[#2a2f38]">
-                    Одиночное добавление
-                </button>
-            </div>
-            <div id="inputForm"></div>
-        </div>
-    `;
-}
-
 // Показ формы массового добавления
 function showBulkInput() {
-    const inputForm = document.getElementById('inputForm');
-    inputForm.innerHTML = `
-        <div class="space-y-4">
-            <textarea id="bulkInput" 
-                      rows="10" 
-                      placeholder="Примеры форматов:
-#BTC +55%
+    if (!checkAuth()) return;
+
+    document.querySelector('.admin-form').innerHTML = `
+        <h3 class="text-[#00ff9d] text-xl mb-4">Массовое добавление сделок</h3>
+        
+        <div class="mode-switcher mb-4">
+            <button onclick="showBulkInput()" class="mode-btn active">Массовое добавление</button>
+            <button onclick="showRegularForm()" class="mode-btn">Одиночное добавление</button>
+            <button onclick="showTradesList()" class="mode-btn">Управление сделками</button>
+        </div>
+
+        <div class="input-group">
+            <textarea id="bulkInput" placeholder="Поддерживаемые форматы:
+
+SPOT:
+BTC +55%
 ETH -12%
-SOL +33% (10x)
-DOT +25%" 
-                      class="w-full p-4 bg-[#1a1d24] border border-[#00ff9d] rounded-lg text-white"></textarea>
-            <button onclick="processBulkInput()" 
-                    class="w-full px-6 py-2 bg-[#00ff9d] text-[#1a1d24] rounded-lg">
-                Добавить сделки
-            </button>
+1. SOL +33%
+#APE -20%
+
+FUTURES:
+BNB +35% (5x)
+DOGE -15% (10x)
+1. ETH +76% (20x)
+
+DeFi:
+UNI +25%
+AAVE -18%"></textarea>
+            <button onclick="processBulkTrades()" class="add-btn">Добавить сделки</button>
         </div>
     `;
+    updateModeBtns('bulk');
 }
 
 // Показ формы одиночного добавления
-function showSingleInput() {
-    const inputForm = document.getElementById('inputForm');
-    inputForm.innerHTML = `
-        <div class="space-y-4">
-            <input type="text" 
-                   id="pairInput" 
-                   placeholder="Пара (например: BTC)" 
-                   class="w-full px-4 py-2 bg-[#1a1d24] border border-[#00ff9d] rounded-lg text-white">
-            <input type="number" 
-                   id="resultInput" 
-                   placeholder="Результат в % (например: 55 или -12)" 
-                   class="w-full px-4 py-2 bg-[#1a1d24] border border-[#00ff9d] rounded-lg text-white">
-            <input type="text" 
-                   id="leverageInput" 
-                   placeholder="Кратность (например: 10x)" 
-                   class="w-full px-4 py-2 bg-[#1a1d24] border border-[#00ff9d] rounded-lg text-white">
-            <button onclick="processSingleInput()" 
-                    class="w-full px-6 py-2 bg-[#00ff9d] text-[#1a1d24] rounded-lg">
-                Добавить сделку
-            </button>
+function showRegularForm() {
+    if (!checkAuth()) return;
+
+    document.querySelector('.admin-form').innerHTML = `
+        <h3 class="text-[#00ff9d] text-xl mb-4">Одиночное добавление</h3>
+        
+        <div class="mode-switcher mb-4">
+            <button onclick="showBulkInput()" class="mode-btn">Массовое добавление</button>
+            <button onclick="showRegularForm()" class="mode-btn active">Одиночное добавление</button>
+            <button onclick="showTradesList()" class="mode-btn">Управление сделками</button>
         </div>
+
+        <div class="input-group">
+            <label>Пара</label>
+            <input type="text" id="pairInput" placeholder="Например: BTC">
+        </div>
+        <div class="input-group">
+            <label>Результат (%)</label>
+            <input type="number" id="resultInput" step="0.01" placeholder="Например: 55 или -12">
+        </div>
+        <div class="input-group">
+            <label>Кратность (для FUTURES)</label>
+            <input type="text" id="leverageInput" placeholder="Например: 20x">
+        </div>
+        <button onclick="processSingleTrade()" class="add-btn">Добавить сделку</button>
     `;
+    updateModeBtns('single');
 }
 
-// Обработка массового ввода
-function processBulkInput() {
+// Показ списка сделок для управления
+function showTradesList() {
+    if (!checkAuth()) return;
+
+    const year = document.getElementById('yearSelect').value;
+    const month = document.getElementById('monthSelect').value;
+    const category = document.getElementById('categorySelect').value;
+    
+    const trades = getPeriodData(year, month, category);
+    
+    let html = `
+        <h3 class="text-[#00ff9d] text-xl mb-4">Управление сделками</h3>
+        
+        <div class="mode-switcher mb-4">
+            <button onclick="showBulkInput()" class="mode-btn">Массовое добавление</button>
+            <button onclick="showRegularForm()" class="mode-btn">Одиночное добавление</button>
+            <button onclick="showTradesList()" class="mode-btn active">Управление сделками</button>
+        </div>
+    `;
+
+    // Отображение текущего периода
+    html += `
+        <div class="current-period mb-4 p-3 rounded bg-[#1e293b]">
+            <p>Период: ${month} ${year}</p>
+            <p>Категория: ${category}</p>
+        </div>
+    `;
+    
+    html += '<div class="trades-list">';
+    
+    if (trades.length === 0) {
+        html += '<p class="text-center text-gray-500">Нет сделок за выбранный период</p>';
+    } else {
+        trades.forEach((trade, index) => {
+            const resultColor = trade.result > 0 ? '#00ff9d' : '#ff4444';
+            const resultText = `${trade.result > 0 ? '+' : ''}${trade.result}%${trade.leverage ? ` (${trade.leverage})` : ''}`;
+            
+            html += `
+                <div class="trade-item fade-in">
+                    <div class="trade-content">
+                        <span style="color: ${resultColor}">#${trade.pair} ${resultText}</span>
+                    </div>
+                    <div class="trade-actions">
+                        <button onclick="confirmDelete('${year}', '${month}', '${category}', ${index})" class="delete-btn">
+                            Удалить
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+    
+    html += '</div>';
+    document.querySelector('.admin-form').innerHTML = html;
+    updateModeBtns('manage');
+}
+
+// Подтверждение удаления
+function confirmDelete(year, month, category, index) {
+    if (!checkAuth()) return;
+
+    if (confirm('Удалить эту сделку?')) {
+        try {
+            if (deleteTradeData(year, month, category, index)) {
+                showNotification('Сделка удалена', 'success');
+                showTradesList();
+                updateContent();
+            } else {
+                throw new Error('Не удалось удалить сделку');
+            }
+        } catch (error) {
+            console.error('Ошибка при удалении:', error);
+            showNotification('Ошибка при удалении', 'error');
+        }
+    }
+}
+
+// Обработка массового добавления
+function processBulkTrades() {
+    if (!checkAuth()) return;
+
     const text = document.getElementById('bulkInput').value;
-    const trades = parseTradesFlexible(text);
+    const trades = parseTrades(text);
     
     if (trades.length === 0) {
         showNotification('Не удалось распознать сделки', 'error');
@@ -142,15 +233,17 @@ function processBulkInput() {
     const month = document.getElementById('monthSelect').value;
     const category = document.getElementById('categorySelect').value;
 
-    addTradeData(year, month, category, trades);
-    updateContent();
-    
-    document.getElementById('bulkInput').value = '';
-    showNotification(`Добавлено ${trades.length} сделок`, 'success');
+    if (addTradeData(year, month, category, trades)) {
+        document.getElementById('bulkInput').value = '';
+        showNotification(`Добавлено ${trades.length} сделок`, 'success');
+        updateContent();
+    }
 }
 
-// Обработка одиночного ввода
-function processSingleInput() {
+// Обработка одиночного добавления
+function processSingleTrade() {
+    if (!checkAuth()) return;
+
     const pair = document.getElementById('pairInput').value;
     const result = parseFloat(document.getElementById('resultInput').value);
     const leverage = document.getElementById('leverageInput').value;
@@ -162,38 +255,47 @@ function processSingleInput() {
 
     const trade = {
         id: Date.now(),
-        pair: pair,
+        pair: pair.toUpperCase(),
         result: result,
-        leverage: leverage ? `${leverage}` : '',
-        status: result > 0 ? 'profit' : 'loss'
+        leverage: leverage ? leverage : '',
+        status: result > 0 ? 'profit' : 'loss',
+        timestamp: new Date().toISOString()
     };
 
     const year = document.getElementById('yearSelect').value;
     const month = document.getElementById('monthSelect').value;
     const category = document.getElementById('categorySelect').value;
 
-    addTradeData(year, month, category, trade);
-    updateContent();
+    if (addTradeData(year, month, category, trade)) {
+        document.getElementById('pairInput').value = '';
+        document.getElementById('resultInput').value = '';
+        document.getElementById('leverageInput').value = '';
+        
+        showNotification('Сделка добавлена', 'success');
+        updateContent();
+    }
+}
 
-    // Очистка формы
-    document.getElementById('pairInput').value = '';
-    document.getElementById('resultInput').value = '';
-    document.getElementById('leverageInput').value = '';
-    
-    showNotification('Сделка добавлена', 'success');
+// Обновление активных кнопок режима
+function updateModeBtns(activeMode) {
+    const btns = document.querySelectorAll('.mode-btn');
+    btns.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('onclick').includes(activeMode)) {
+            btn.classList.add('active');
+        }
+    });
 }
 
 // Показ уведомлений
 function showNotification(message, type = 'success') {
     const notification = document.createElement('div');
-    notification.className = `notification ${type} fade-in`;
+    notification.className = `notification ${type}`;
     notification.textContent = message;
     
     document.body.appendChild(notification);
 
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
+    setTimeout(() => notification.remove(), 3000);
 }
 
 // Инициализация при загрузке страницы
