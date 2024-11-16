@@ -1,10 +1,10 @@
-// Конфигурация сайта
+// Конфигурация GitHub
 window.githubConfig = {
     owner: 'zukurishido',
     repo: 'CRYPTO-SHARKS',
     branch: 'main',
-    adminHash: btoa('ВАШ_ПАРОЛЬ_АДМИНА'), // Замените на ваш пароль
-    token: 'ВАШ_GITHUB_TOKEN', // Замените на ваш токен
+    adminHash: 'YWRtaW4xMjM=', // Зашифрованный пароль admin123
+    // Токен будет добавлен через localStorage при успешной авторизации
     dataFile: 'trades.json'
 };
 
