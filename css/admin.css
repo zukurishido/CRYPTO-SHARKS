@@ -8,10 +8,11 @@
     background: rgba(15, 23, 42, 0.98);
     backdrop-filter: blur(10px);
     padding: 1.5rem;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1000;
     overflow-y: auto;
     border-left: 1px solid rgba(0, 255, 157, 0.2);
+    box-shadow: -4px 0 15px rgba(0, 0, 0, 0.3);
 }
 
 .admin-panel.visible {
@@ -31,7 +32,7 @@
 .admin-header h2 {
     color: var(--primary);
     font-size: 1.5rem;
-    font-weight: bold;
+    font-weight: 700;
 }
 
 .close-btn {
@@ -41,11 +42,12 @@
     font-size: 1.5rem;
     cursor: pointer;
     padding: 0.5rem;
-    transition: color 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .close-btn:hover {
     color: var(--primary);
+    transform: scale(1.1);
 }
 
 /* Переключатели режимов */
@@ -69,6 +71,10 @@
     transition: all 0.3s ease;
     font-size: 0.9rem;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .mode-btn:hover {
@@ -81,6 +87,10 @@
     color: black;
     font-weight: 500;
     border-color: transparent;
+}
+
+.mode-icon {
+    font-size: 1.2rem;
 }
 
 /* Формы */
@@ -101,9 +111,19 @@
     font-size: 0.9rem;
 }
 
-.admin-form input,
-.admin-form textarea,
-.admin-form select {
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.login-attempts {
+    text-align: center;
+    color: #8892a0;
+    font-size: 0.9rem;
+}
+
+.trade-input {
     width: 100%;
     padding: 0.75rem;
     background: rgba(0, 0, 0, 0.3);
@@ -115,19 +135,51 @@
     transition: all 0.3s ease;
 }
 
-.admin-form input:focus,
-.admin-form textarea:focus,
-.admin-form select:focus {
+.trade-input:focus {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 0 2px rgba(0, 255, 157, 0.1);
 }
 
-.admin-form textarea {
+textarea.trade-input {
     min-height: 200px;
     font-family: monospace;
     resize: vertical;
     line-height: 1.5;
+}
+
+/* Группы элементов */
+.result-group {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.category-select {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 0.5rem;
+}
+
+.category-select label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: white;
+    cursor: pointer;
+}
+
+.category-select input[type="radio"] {
+    accent-color: var(--primary);
+}
+
+.button-group {
+    display: flex;
+    gap: 0.75rem;
 }
 
 /* Кнопки */
@@ -147,6 +199,35 @@
     background: var(--primary-dark);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 255, 157, 0.2);
+}
+
+.clear-btn {
+    padding: 0.75rem;
+    background: rgba(255, 68, 68, 0.1);
+    color: #ff4444;
+    border: 1px solid rgba(255, 68, 68, 0.2);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.clear-btn:hover {
+    background: rgba(255, 68, 68, 0.2);
+    transform: translateY(-2px);
+}
+
+.help-btn {
+    padding: 0.5rem;
+    background: transparent;
+    border: none;
+    color: #8892a0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.help-btn:hover {
+    color: var(--primary);
 }
 
 /* Список сделок */
@@ -174,14 +255,22 @@
 }
 
 .trade-content {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+    flex-grow: 1;
 }
 
-.trade-actions {
+.trade-info {
     display: flex;
-    gap: 0.5rem;
+    align-items: center;
+    gap: 1rem;
+}
+
+.trade-pair {
+    font-weight: 500;
+}
+
+.trade-date {
+    font-size: 0.8rem;
+    color: #8892a0;
 }
 
 .delete-btn {
@@ -192,7 +281,6 @@
     border-radius: 0.5rem;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-size: 0.9rem;
 }
 
 .delete-btn:hover {
@@ -200,63 +288,18 @@
     transform: translateY(-2px);
 }
 
-/* Уведомления */
-.notification {
-    position: fixed;
-    bottom: 1rem;
-    right: 1rem;
-    padding: 1rem 1.5rem;
-    border-radius: 0.5rem;
-    color: white;
-    z-index: 1100;
-    animation: slideIn 0.3s ease;
-    font-size: 0.9rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.notification.success {
-    background: var(--primary);
-    color: black;
-}
-
-.notification.error {
-    background: #ff4444;
-}
-
-/* Текущий период */
+/* Период */
 .current-period {
     margin-bottom: 1rem;
     padding: 0.75rem;
     background: rgba(0, 0, 0, 0.2);
     border-radius: 0.5rem;
     font-size: 0.9rem;
+    color: #8892a0;
     border: 1px solid rgba(0, 255, 157, 0.1);
 }
 
-/* Стили для placeholder */
-::placeholder {
-    color: rgba(255, 255, 255, 0.5);
-}
-
-/* Кастомный скроллбар для админ-панели */
-.admin-panel::-webkit-scrollbar {
-    width: 6px;
-}
-
-.admin-panel::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.2);
-}
-
-.admin-panel::-webkit-scrollbar-thumb {
-    background: rgba(0, 255, 157, 0.3);
-    border-radius: 3px;
-}
-
-.admin-panel::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 255, 157, 0.5);
-}
-
-/* Адаптивность */
+/* Медиа запросы */
 @media (max-width: 500px) {
     .admin-panel {
         width: 100%;
@@ -269,5 +312,13 @@
 
     .mode-switcher {
         grid-template-columns: 1fr;
+    }
+
+    .result-group {
+        grid-template-columns: 1fr;
+    }
+
+    .category-select {
+        flex-direction: column;
     }
 }
