@@ -9,155 +9,132 @@ const MONTHS = [
 ];
 const CATEGORIES = ['SPOT', 'FUTURES', 'DeFi'];
 
-// Конфигурация синхронизации
-const SYNC_CONFIG = {
-    syncInterval: 30000,
-    retryAttempts: 3,
-    retryDelay: 3000
-};
-
-// Состояние синхронизации
-const syncState = {
-    lastSync: null,
-    isSyncing: false,
-    lastError: null,
-    version: null,
-    retryCount: 0
-};
-
-// Загрузка данных с JSONBin
+// Улучшенная загрузка данных
 async function loadData() {
     try {
-        if (syncState.isSyncing) return;
-        syncState.isSyncing = true;
-        showSyncStatus('Синхронизация...');
-
-        // Попытка загрузить с JSONBin
-        const response = await fetch(`https://api.jsonbin.io/v3/b/${SYNC_CONFIG.binId}/latest`, {
-            headers: {
-                'X-Master-Key': SYNC_CONFIG.key,
-                'X-Bin-Meta': 'false'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        // Добавляем timestamp для предотвращения кэширования
+        const timestamp = new Date().getTime();
+        const response = await fetch(`${window.githubConfig.dataFile}?t=${timestamp}`);
+        
+        if (!response.ok) throw new Error('Failed to fetch data');
+        
+        const loadedData = await response.json();
+        
+        // Проверка структуры данных
+        if (!isValidDataStructure(loadedData)) {
+            throw new Error('Invalid data structure');
         }
-
-        const remoteData = await response.json();
-
+        
+        data = loadedData;
+        
         // Инициализация структуры данных
         YEARS.forEach(year => {
-            if (!remoteData[year]) remoteData[year] = {};
+            if (!data[year]) data[year] = {};
             MONTHS.forEach(month => {
-                if (!remoteData[year][month]) {
-                    remoteData[year][month] = {};
+                if (!data[year][month]) {
+                    data[year][month] = {};
                     CATEGORIES.forEach(category => {
-                        if (!remoteData[year][month][category]) {
-                            remoteData[year][month][category] = { trades: [] };
+                        if (!data[year][month][category]) {
+                            data[year][month][category] = { trades: [] };
                         }
                     });
                 }
             });
         });
 
-        data = remoteData;
+        // Кэширование данных
         localStorage.setItem('cryptoSharksData', JSON.stringify(data));
-        syncState.lastSync = Date.now();
-        syncState.lastError = null;
-        showSyncStatus('Данные обновлены', 'success');
-        updateContent();
+        localStorage.setItem('cryptoSharksLastUpdate', timestamp.toString());
+        
         return true;
     } catch (error) {
-        console.error('Ошибка загрузки данных:', error);
-        syncState.lastError = error.message;
-        showSyncStatus(`Ошибка синхронизации: ${error.message}`, 'error');
+        console.error('Error loading data:', error);
         
-        // Загрузка локальных данных при ошибке
-        const savedData = localStorage.getItem('cryptoSharksData');
-        if (savedData) {
-            data = JSON.parse(savedData);
+        // Попытка загрузить из кэша
+        const cachedData = localStorage.getItem('cryptoSharksData');
+        if (cachedData) {
+            try {
+                data = JSON.parse(cachedData);
+                return true;
+            } catch (e) {
+                console.error('Cache parsing error:', e);
+            }
         }
         return false;
-    } finally {
-        syncState.isSyncing = false;
     }
 }
 
-// Сохранение данных в JSONBin
+// Улучшенное сохранение данных
 async function saveData() {
-    try {
-        if (syncState.isSyncing) return false;
-        syncState.isSyncing = true;
-        showSyncStatus('Сохранение...');
+    if (!window.isAuthenticated) {
+        showNotification('Требуется авторизация', 'error');
+        return false;
+    }
 
-        const response = await fetch(`https://api.jsonbin.io/v3/b/${SYNC_CONFIG.binId}`, {
+    try {
+        // Получаем текущий SHA файла
+        const fileUrl = `https://api.github.com/repos/${window.githubConfig.owner}/${window.githubConfig.repo}/contents/${window.githubConfig.dataFile}`;
+        const fileResponse = await fetch(fileUrl, {
+            headers: {
+                'Authorization': `token ${window.githubConfig.token}`
+            }
+        });
+        
+        if (!fileResponse.ok) throw new Error('Failed to get file info');
+        
+        const fileInfo = await fileResponse.json();
+
+        // Подготовка данных
+        const content = btoa(JSON.stringify(data, null, 2));
+        
+        // Сохранение на GitHub
+        const response = await fetch(fileUrl, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': SYNC_CONFIG.key,
-                'X-Bin-Versioning': 'false'
+                'Authorization': `token ${window.githubConfig.token}`,
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify({
+                message: 'Update trading data',
+                content: content,
+                sha: fileInfo.sha,
+                branch: window.githubConfig.branch
+            })
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        if (!response.ok) throw new Error('Failed to save data');
 
+        // Обновление локального кэша
         localStorage.setItem('cryptoSharksData', JSON.stringify(data));
-        syncState.lastSync = Date.now();
-        showSyncStatus('Сохранено', 'success');
+        localStorage.setItem('cryptoSharksLastUpdate', new Date().getTime().toString());
+        
+        showNotification('Данные успешно сохранены', 'success');
         return true;
     } catch (error) {
-        console.error('Ошибка сохранения:', error);
-        syncState.lastError = error.message;
-        showSyncStatus(`Ошибка сохранения: ${error.message}`, 'error');
+        console.error('Save error:', error);
+        showNotification('Ошибка сохранения', 'error');
         return false;
-    } finally {
-        syncState.isSyncing = false;
     }
 }
 
-// Показ статуса синхронизации
-function showSyncStatus(message, type = 'info') {
-    const statusContainer = document.getElementById('syncStatus') || createSyncStatusElement();
-    statusContainer.className = `sync-status ${type}`;
-    statusContainer.innerHTML = `
-        <span class="sync-message">${message}</span>
-        ${type === 'error' ? '<button onclick="retrySync()" class="retry-btn">Повторить</button>' : ''}
-    `;
-
-    if (type !== 'error') {
-        setTimeout(() => {
-            statusContainer.classList.add('fade-out');
-        }, 3000);
-    }
+// Проверка структуры данных
+function isValidDataStructure(data) {
+    if (typeof data !== 'object' || data === null) return false;
+    
+    return true; // Базовая проверка, можно расширить при необходимости
 }
 
-// Создание элемента статуса синхронизации
-function createSyncStatusElement() {
-    const container = document.createElement('div');
-    container.id = 'syncStatus';
-    document.body.appendChild(container);
-    return container;
-}
-
-// Повторная синхронизация
-async function retrySync() {
-    syncState.retryCount = 0;
-    await loadData();
-}
-
-// Парсер сделок
+// Парсер сделок с улучшенной валидацией
 function parseTrades(text) {
     const lines = text.split('\n').filter(line => line.trim());
     let currentCategory = '';
     let trades = [];
     
     lines.forEach(line => {
+        // Очистка строки
         const cleanLine = line.trim().replace(/["""'']/g, '');
 
+        // Определение категории
         if (cleanLine.match(/DEFI|ДЕФИ|DEFI:|ДЕФИ:|DEFI🚀|DEF|DEPOSIT|ДЕФИ СПОТЫ?/i)) {
             currentCategory = 'DeFi';
             return;
@@ -169,13 +146,13 @@ function parseTrades(text) {
             return;
         }
 
+        // Паттерны для разбора строк
         const patterns = [
             /[#]?(\w+)\s*([-+])\s*(\d+\.?\d*)%\s*(?:\((\d+)x\)?)?/i,
             /(?:\d+[\.)]\s*)[#]?(\w+)\s*([-+])\s*(\d+\.?\d*)%\s*(?:\((\d+)x\)?)?/i,
             /(\w+)\s*[-\.]\s*([-+])\s*(\d+\.?\d*)%\s*(?:\((\d+)x\)?)?/i,
             /(\w+)([-+])(\d+\.?\d*)%\s*(?:\((\d+)x\)?)?/i,
-            /(\w+)\s+(\d+\.?\d*)%/i,
-            /[#]?(\w+)\s*([+-])?(\d+\.?\d*)%\s*(?:\((\d+)[xх]\)?)?/i
+            /(\w+)\s+(\d+\.?\d*)%/i
         ];
 
         for (const pattern of patterns) {
@@ -209,6 +186,11 @@ function parseTrades(text) {
 
 // Добавление сделок
 async function addTradeData(year, month, category, trades) {
+    if (!window.isAuthenticated) {
+        showNotification('Требуется авторизация', 'error');
+        return false;
+    }
+
     try {
         if (!data[year]) data[year] = {};
         if (!data[year][month]) data[year][month] = {};
@@ -220,11 +202,14 @@ async function addTradeData(year, month, category, trades) {
             data[year][month][category].trades.push(trades);
         }
         
-        await saveData();
-        return true;
+        const success = await saveData();
+        if (success) {
+            showNotification('Сделки успешно добавлены', 'success');
+        }
+        return success;
     } catch (error) {
-        console.error('Ошибка добавления:', error);
-        showSyncStatus('Ошибка при добавлении сделок', 'error');
+        console.error('Error adding trades:', error);
+        showNotification('Ошибка добавления сделок', 'error');
         return false;
     }
 }
@@ -234,46 +219,62 @@ function getPeriodData(year, month, category) {
     return data[year]?.[month]?.[category]?.trades || [];
 }
 
-// Удаление сделки
+// Улучшенное удаление сделки
 async function deleteTradeData(year, month, category, index) {
+    if (!window.isAuthenticated) {
+        showNotification('Требуется авторизация', 'error');
+        return false;
+    }
+
     try {
         if (!data[year] || !data[year][month] || !data[year][month][category]) {
             return false;
         }
 
         const trades = data[year][month][category].trades;
-        
         if (index >= 0 && index < trades.length) {
             trades.splice(index, 1);
-            await saveData();
-            return true;
+            const success = await saveData();
+            if (success) {
+                showNotification('Сделка удалена', 'success');
+            }
+            return success;
         }
         
         return false;
     } catch (error) {
-        console.error('Ошибка удаления данных:', error);
-        showSyncStatus('Ошибка при удалении', 'error');
+        console.error('Error deleting trade:', error);
+        showNotification('Ошибка удаления', 'error');
         return false;
     }
 }
 
-// Расчет статистики
+// Расчет статистики с дополнительными метриками
 function calculateStats(trades) {
     try {
         let totalProfit = 0;
         let totalLoss = 0;
         let profitCount = 0;
         let lossCount = 0;
+        let maxProfit = 0;
+        let maxLoss = 0;
+        let avgProfit = 0;
+        let avgLoss = 0;
         
         trades.forEach(trade => {
             if (trade.result > 0) {
                 totalProfit += trade.result;
                 profitCount++;
+                maxProfit = Math.max(maxProfit, trade.result);
             } else if (trade.result < 0) {
                 totalLoss += Math.abs(trade.result);
                 lossCount++;
+                maxLoss = Math.max(maxLoss, Math.abs(trade.result));
             }
         });
+
+        if (profitCount > 0) avgProfit = totalProfit / profitCount;
+        if (lossCount > 0) avgLoss = totalLoss / lossCount;
 
         return {
             totalTrades: trades.length,
@@ -281,38 +282,28 @@ function calculateStats(trades) {
             lossTrades: lossCount,
             totalProfit: totalProfit.toFixed(1),
             totalLoss: totalLoss.toFixed(1),
-            winRate: trades.length > 0 ? ((profitCount / trades.length) * 100).toFixed(1) : 0
+            winRate: trades.length > 0 ? ((profitCount / trades.length) * 100).toFixed(1) : 0,
+            maxProfit: maxProfit.toFixed(1),
+            maxLoss: maxLoss.toFixed(1),
+            avgProfit: avgProfit.toFixed(1),
+            avgLoss: avgLoss.toFixed(1)
         };
     } catch (error) {
-        console.error('Ошибка расчета статистики:', error);
+        console.error('Error calculating stats:', error);
         return {
             totalTrades: 0,
             profitTrades: 0,
             lossTrades: 0,
             totalProfit: '0.0',
             totalLoss: '0.0',
-            winRate: '0.0'
+            winRate: '0.0',
+            maxProfit: '0.0',
+            maxLoss: '0.0',
+            avgProfit: '0.0',
+            avgLoss: '0.0'
         };
     }
 }
 
-// Автоматическая синхронизация
-function startAutoSync() {
-    // Начальная загрузка
-    loadData();
-    
-    // Периодическая синхронизация
-    setInterval(loadData, SYNC_CONFIG.syncInterval);
-    
-    // Синхронизация при возвращении вкладки
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-            loadData();
-        }
-    });
-}
-
-// Инициализация при загрузке страницы
-document.addEventListener('DOMContentLoaded', () => {
-    startAutoSync();
-});
+// Автоматическое обновление
+setInterval(loadData, 30000);
