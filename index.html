@@ -3,63 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRYPTO SHARKS</title>
-    
+    <meta name="description" content="Статистика трейдинга CRYPTO SHARKS">
+    <title>CRYPTO SHARKS - Статистика</title>
     <!-- Стили -->
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/admin.css">
-    <link rel="stylesheet" href="css/animations.css">
-    <link rel="stylesheet" href="css/sync-styles.css">
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="animations.css">
+    <!-- Добавим favicon -->
+    <link rel="icon" type="image/png" href="favicon.png">
 </head>
 <body>
     <div class="container mx-auto px-4 py-6">
         <!-- Шапка -->
-        <div class="header">
+        <header class="header">
             <h1 class="title">CRYPTO SHARKS</h1>
             <button id="adminButton" class="admin-btn">Админ панель</button>
-        </div>
+        </header>
 
         <!-- Фильтры -->
         <div id="filters" class="filters">
-            <select id="yearSelect" class="filter-select">
-                <option value="2023">2023</option>
-                <option value="2024">2024</option>
-                <option value="2025">2025</option>
-                <option value="2026">2026</option>
-                <option value="2027">2027</option>
-                <option value="2028">2028</option>
-                <option value="2029">2029</option>
-                <option value="2030">2030</option>
-            </select>
-            
-            <select id="monthSelect" class="filter-select">
-                <option value="Январь">Январь</option>
-                <option value="Февраль">Февраль</option>
-                <option value="Март">Март</option>
-                <option value="Апрель">Апрель</option>
-                <option value="Май">Май</option>
-                <option value="Июнь">Июнь</option>
-                <option value="Июль">Июль</option>
-                <option value="Август">Август</option>
-                <option value="Сентябрь">Сентябрь</option>
-                <option value="Октябрь">Октябрь</option>
-                <option value="Ноябрь">Ноябрь</option>
-                <option value="Декабрь">Декабрь</option>
-            </select>
-            
-            <select id="categorySelect" class="filter-select">
-                <option value="SPOT">SPOT</option>
-                <option value="FUTURES">FUTURES</option>
-                <option value="DeFi">DeFi</option>
-            </select>
+            <!-- Заполняется динамически -->
         </div>
 
         <!-- Статистика -->
-        <div id="summaryStats" class="summary-stats"></div>
+        <div id="summaryStats" class="summary-stats">
+            <!-- Заполняется динамически -->
+        </div>
 
         <!-- Контейнер сделок -->
         <div id="statsContainer" class="stats-container">
-            <div id="tradesGrid" class="trades-grid"></div>
+            <div id="tradesGrid" class="trades-grid">
+                <!-- Заполняется динамически -->
+            </div>
         </div>
     </div>
 
@@ -69,23 +44,15 @@
             <h2>Админ панель</h2>
             <button id="closeAdmin" class="close-btn">✕</button>
         </div>
-        <div class="admin-form"></div>
+        <div class="admin-form">
+            <!-- Заполняется динамически -->
+        </div>
     </div>
 
-    <!-- Конфигурация JSONBin -->
-    <script>
-        const SYNC_CONFIG = {
-            binId: '673607eeacd3cb34a8a8912b',
-            key: '$2a$10$ZyhJn3sHuiHpDJCn.I0B9.ynZDnNdcqrb3JuhEw9eEWvF4ADsoigi'
-        };
-    </script>
-
-    <!-- Индикатор синхронизации -->
-    <div id="syncStatus"></div>
-
     <!-- Скрипты -->
-    <script src="js/data.js"></script>
-    <script src="js/admin.js"></script>
-    <script src="js/main.js"></script>
+    <script src="config.js"></script>
+    <script src="data.js"></script>
+    <script src="admin.js"></script>
+    <script src="main.js"></script>
 </body>
 </html>
