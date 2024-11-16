@@ -10,10 +10,21 @@
     }
 }
 
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+}
+
 @keyframes slideInRight {
     from {
         opacity: 0;
-        transform: translateX(-20px);
+        transform: translateX(20px);
     }
     to {
         opacity: 1;
@@ -24,7 +35,7 @@
 @keyframes slideInLeft {
     from {
         opacity: 0;
-        transform: translateX(20px);
+        transform: translateX(-20px);
     }
     to {
         opacity: 1;
@@ -45,12 +56,15 @@
 }
 
 /* Эффект свечения */
-@keyframes shine {
-    from {
-        transform: translateX(-100%);
+@keyframes glow {
+    0% {
+        box-shadow: 0 0 5px rgba(0, 255, 157, 0.2);
     }
-    to {
-        transform: translateX(100%);
+    50% {
+        box-shadow: 0 0 20px rgba(0, 255, 157, 0.4);
+    }
+    100% {
+        box-shadow: 0 0 5px rgba(0, 255, 157, 0.2);
     }
 }
 
@@ -67,184 +81,17 @@
     }
 }
 
-/* Анимация для удаления */
-@keyframes fadeOut {
+/* Вращение */
+@keyframes spin {
     from {
-        opacity: 1;
-        transform: translateX(0);
+        transform: rotate(0deg);
     }
     to {
-        opacity: 0;
-        transform: translateX(100%);
+        transform: rotate(360deg);
     }
 }
 
-/* Анимация обновления */
-@keyframes flash {
-    0% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.5;
-    }
-    100% {
-        opacity: 1;
-    }
-}
-
-/* Применение анимаций */
-.fade-in {
-    animation: fadeIn 0.5s ease-out forwards;
-    opacity: 0;
-}
-
-.slide-in-right {
-    animation: slideInRight 0.5s ease-out forwards;
-    opacity: 0;
-}
-
-.slide-in-left {
-    animation: slideInLeft 0.5s ease-out forwards;
-    opacity: 0;
-}
-
-/* Задержки для анимаций */
-.delay-1 { animation-delay: 0.1s; }
-.delay-2 { animation-delay: 0.2s; }
-.delay-3 { animation-delay: 0.3s; }
-.delay-4 { animation-delay: 0.4s; }
-.delay-5 { animation-delay: 0.5s; }
-
-/* Анимации для карточек */
-.trade-card {
-    opacity: 0;
-    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.trade-card.visible {
-    animation: fadeIn 0.5s ease-out forwards;
-}
-
-/* Анимация для статистики */
-.stat-box {
-    transition: transform 0.3s ease, border-color 0.3s ease;
-}
-
-.stat-box:hover {
-    transform: translateY(-5px);
-}
-
-/* Анимация для админ-панели */
-.admin-panel {
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Анимация для кнопок */
-.mode-btn,
-.edit-btn,
-.delete-btn,
-.add-btn {
-    transition: all 0.3s ease;
-}
-
-.mode-btn:hover,
-.edit-btn:hover,
-.delete-btn:hover,
-.add-btn:hover {
-    transform: translateY(-2px);
-}
-
-/* Анимация для уведомлений */
-.notification {
-    animation: slideInLeft 0.3s ease-out, 
-               fadeOut 0.3s ease-out 2.7s forwards;
-}
-
-/* Анимация удаления элементов */
-.removing {
-    animation: fadeOut 0.3s ease-out forwards;
-}
-
-/* Анимация обновления контента */
-.updating {
-    animation: flash 0.3s ease-out;
-}
-
-/* Эффект наведения для элементов управления */
-.trade-actions button {
-    transition: all 0.2s ease;
-    opacity: 0.8;
-}
-
-.trade-actions button:hover {
-    opacity: 1;
-    transform: translateY(-1px);
-}
-
-/* Анимация для формы входа */
-.admin-form {
-    animation: fadeIn 0.3s ease-out;
-}
-
-/* Анимация для результатов */
-.trade-result {
-    transition: color 0.3s ease;
-}
-
-/* Анимация для иконок */
-.trade-icon {
-    transition: transform 0.3s ease;
-}
-
-.trade-card:hover .trade-icon {
-    transform: scale(1.2);
-}
-
-/* Эффект свечения для прогресс-бара */
-.progress-bar::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.2),
-        transparent
-    );
-    animation: shine 2s infinite;
-}
-
-/* Анимация для фильтров */
-.filter-select {
-    transition: all 0.3s ease;
-}
-
-.filter-select:focus {
-    transform: translateY(-1px);
-}
-
-/* Hover эффекты */
-.hover-scale {
-    transition: transform 0.3s ease;
-}
-
-.hover-scale:hover {
-    transform: scale(1.05);
-}
-
-.hover-lift {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.hover-lift:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0, 255, 157, 0.2);
-}
-
-/* Анимация текста */
+/* Свечение текста */
 @keyframes textGlow {
     0% {
         text-shadow: 0 0 5px rgba(0, 255, 157, 0.5);
@@ -257,16 +104,72 @@
     }
 }
 
+/* Блик */
+@keyframes shine {
+    from {
+        background-position: -200% center;
+    }
+    to {
+        background-position: 200% center;
+    }
+}
+
+/* Применение анимаций */
+.fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+.fade-out {
+    animation: fadeOut 0.3s ease-out forwards;
+}
+
+.slide-in-right {
+    animation: slideInRight 0.5s ease-out forwards;
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.5s ease-out forwards;
+}
+
+/* Анимация для заголовка */
 .title {
     animation: textGlow 3s infinite;
 }
 
-/* Эффект загрузки */
-.loading {
-    position: relative;
-    overflow: hidden;
+/* Анимации для статистики */
+.stat-box {
+    animation: fadeIn 0.5s ease-out forwards;
 }
 
+.stat-box:hover {
+    animation: pulse 2s infinite;
+}
+
+/* Анимации для карточек */
+.trade-card {
+    animation: fadeIn 0.5s ease-out forwards;
+    animation-fill-mode: both;
+}
+
+.trade-card:hover .progress-bar {
+    animation: shine 2s linear infinite;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.2) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 200% 100%;
+}
+
+/* Анимация для кнопок */
+.admin-btn:hover,
+.add-btn:hover,
+.mode-btn:hover {
+    animation: pulse 1s infinite;
+}
+
+/* Анимация загрузки */
 .loading::after {
     content: '';
     position: absolute;
@@ -280,5 +183,105 @@
         rgba(0, 255, 157, 0.1),
         transparent
     );
-    animation: shine 1.5s infinite;
+    animation: shine 1.5s linear infinite;
+}
+
+/* Анимация уведомлений */
+.notification {
+    animation: slideInLeft 0.3s ease-out,
+               fadeOut 0.3s ease-out 2.7s forwards;
+}
+
+/* Задержки для каскадной анимации */
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+.delay-5 { animation-delay: 0.5s; }
+
+/* Анимация для админ-панели */
+.admin-panel {
+    animation: slideInRight 0.3s ease-out;
+}
+
+/* Анимация удаления */
+.removing {
+    animation: fadeOut 0.3s ease-out forwards;
+}
+
+/* Эффект при наведении */
+.hover-glow:hover {
+    animation: glow 2s infinite;
+}
+
+/* Анимация обновления */
+.updating {
+    position: relative;
+    overflow: hidden;
+}
+
+.updating::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(0, 255, 157, 0.2),
+        transparent
+    );
+    animation: shine 1s linear;
+}
+
+/* Анимация для формы входа */
+.login-form {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Анимация для подсказок */
+.help-tooltip {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+}
+
+.help-tooltip.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Спиннер загрузки */
+.loading-spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(0, 255, 157, 0.3);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Анимация для ошибок валидации */
+.error-shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* Оптимизация производительности */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }
