@@ -14,34 +14,41 @@
 }
 
 body {
-    font-family: system-ui, -apple-system, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
     background-color: var(--dark);
     color: white;
     min-height: 100vh;
+    line-height: 1.5;
 }
 
-/* Header */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Шапка */
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 0;
+    padding: 1.5rem 0;
     margin-bottom: 2rem;
 }
 
 .title {
     font-size: 2.5rem;
-    font-weight: bold;
+    font-weight: 800;
     color: var(--primary);
-    text-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
+    letter-spacing: -0.5px;
 }
 
 .admin-btn {
     background: var(--primary);
-    color: black;
+    color: var(--dark);
     padding: 0.75rem 1.5rem;
     border-radius: 0.5rem;
-    font-weight: bold;
+    font-weight: 600;
     border: none;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -50,9 +57,10 @@ body {
 .admin-btn:hover {
     background: var(--primary-dark);
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 255, 157, 0.2);
 }
 
-/* Filters */
+/* Фильтры */
 .filters {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -61,6 +69,7 @@ body {
     padding: 1.5rem;
     border-radius: 1rem;
     margin-bottom: 2rem;
+    border: 1px solid rgba(0, 255, 157, 0.1);
 }
 
 .filter-select {
@@ -72,16 +81,17 @@ body {
     border-radius: 0.5rem;
     cursor: pointer;
     transition: all 0.3s ease;
+    font-size: 0.95rem;
 }
 
 .filter-select:hover {
     border-color: var(--primary);
 }
 
-/* Stats */
+/* Статистика */
 .summary-stats {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1rem;
     margin-bottom: 2rem;
 }
@@ -90,16 +100,33 @@ body {
     background: var(--card);
     padding: 1.5rem;
     border-radius: 1rem;
+    border: 1px solid rgba(0, 255, 157, 0.1);
+    transition: all 0.3s ease;
+}
+
+.stat-box:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .stat-box h3 {
     color: #8892a0;
     margin-bottom: 0.5rem;
+    font-size: 0.9rem;
 }
 
 .stat-value {
     font-size: 2rem;
-    font-weight: bold;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.stat-details {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #8892a0;
 }
 
 .profit {
@@ -110,20 +137,21 @@ body {
     color: var(--loss);
 }
 
-/* Trades Grid */
+/* Сетка сделок */
 .stats-container {
     background: var(--card);
     border-radius: 1rem;
     padding: 1.5rem;
+    border: 1px solid rgba(0, 255, 157, 0.1);
 }
 
 .trades-grid {
     display: grid;
     gap: 1rem;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 
-/* Trade Cards */
+/* Карточки сделок */
 .trade-card {
     background: rgba(15, 23, 42, 0.6);
     border-radius: 0.75rem;
@@ -132,11 +160,13 @@ body {
     overflow: hidden;
     border: 1px solid rgba(0, 255, 157, 0.1);
     transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
 }
 
 .trade-card:hover {
     transform: translateY(-2px);
     border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .trade-header {
@@ -150,100 +180,47 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-weight: 500;
+    font-weight: 600;
 }
 
-/* Progress Bar */
+.trade-details {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #8892a0;
+    margin-bottom: 0.75rem;
+}
+
+/* Прогресс бар */
 .progress-container {
     height: 4px;
     overflow: hidden;
     border-radius: 4px;
-    margin-top: 0.75rem;
-    background: transparent;
+    background: rgba(0, 0, 0, 0.2);
 }
 
 .progress-bar {
     height: 100%;
     transition: width 1s ease-in-out;
-    width: 100%;
-}
-
-.progress-bar.profit {
-    background: var(--profit);
-}
-
-.progress-bar.loss {
-    background: var(--loss);
-}
-
-.profit-text {
-    color: var(--profit);
-}
-
-.loss-text {
-    color: var(--loss);
-}
-
-/* Animations */
-.fade-in {
-    animation: fadeIn 0.5s ease-out forwards;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .filters,
-    .summary-stats {
-        grid-template-columns: 1fr;
-    }
-
-    .trade-card {
-        margin-bottom: 1rem;
-    }
-
-    .title {
-        font-size: 2rem;
-    }
-}
-
-/* Utils */
-.text-center {
-    text-align: center;
-}
-
-.text-gray-500 {
-    color: #8892a0;
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-    width: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--dark);
-}
-
-::-webkit-scrollbar-thumb {
-    background: rgba(0, 255, 157, 0.3);
+    position: relative;
     border-radius: 4px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 255, 157, 0.5);
+.leverage {
+    font-size: 0.8rem;
+    color: #8892a0;
+    padding: 0.2rem 0.4rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 0.25rem;
+    margin-left: 0.5rem;
 }
 
-/* Notifications */
+/* Утилиты */
+.text-center { text-align: center; }
+.text-gray-500 { color: #8892a0; }
+.mb-4 { margin-bottom: 1rem; }
+
+/* Уведомления */
 .notification {
     position: fixed;
     bottom: 20px;
@@ -252,7 +229,7 @@ body {
     border-radius: 8px;
     color: white;
     z-index: 1100;
-    animation: slideIn 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .notification.success {
@@ -263,13 +240,45 @@ body {
     background: var(--loss);
 }
 
-@keyframes slideIn {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
+.notification.info {
+    background: #3b82f6;
+}
+
+/* Медиа запросы */
+@media (max-width: 768px) {
+    .filters {
+        grid-template-columns: 1fr;
     }
-    to {
-        transform: translateX(0);
-        opacity: 1;
+
+    .summary-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .title {
+        font-size: 2rem;
+    }
+
+    .header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .trade-card {
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .stat-box {
+        padding: 1rem;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+    }
+
+    .filter-select {
+        font-size: 0.9rem;
     }
 }
