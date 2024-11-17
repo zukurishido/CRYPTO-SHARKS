@@ -7,11 +7,12 @@
     height: 100vh;
     background: rgba(15, 23, 42, 0.98);
     backdrop-filter: blur(10px);
-    padding: 1.5rem;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-backdrop-filter: blur(10px);
+    padding: var(--card-padding);
+    transition: transform var(--transition-speed) var(--transition-timing);
     z-index: 1000;
     overflow-y: auto;
-    border-left: 1px solid rgba(0, 255, 157, 0.2);
+    border-left: 1px solid var(--border-color);
     box-shadow: -4px 0 15px rgba(0, 0, 0, 0.3);
 }
 
@@ -26,28 +27,38 @@
     align-items: center;
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(0, 255, 157, 0.2);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .admin-header h2 {
     color: var(--primary);
     font-size: 1.5rem;
     font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .close-btn {
     background: transparent;
     border: none;
-    color: white;
+    color: var(--text-primary);
     font-size: 1.5rem;
     cursor: pointer;
     padding: 0.5rem;
-    transition: all 0.3s ease;
+    transition: all var(--transition-speed) ease;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .close-btn:hover {
     color: var(--primary);
     transform: scale(1.1);
+    background: var(--primary-light);
 }
 
 /* Переключатели режимов */
@@ -58,19 +69,18 @@
     margin-bottom: 1.5rem;
     background: rgba(0, 0, 0, 0.2);
     padding: 0.75rem;
-    border-radius: 0.75rem;
+    border-radius: var(--border-radius);
 }
 
 .mode-btn {
     padding: 0.75rem;
     background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(0, 255, 157, 0.2);
-    color: white;
-    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: calc(var(--border-radius) / 1.5);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-speed) var(--transition-timing);
     font-size: 0.9rem;
-    text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -78,13 +88,13 @@
 }
 
 .mode-btn:hover {
-    background: rgba(0, 255, 157, 0.1);
+    background: var(--primary-light);
     border-color: var(--primary);
 }
 
 .mode-btn.active {
     background: var(--primary);
-    color: black;
+    color: var(--dark);
     font-weight: 500;
     border-color: transparent;
 }
@@ -96,8 +106,8 @@
 /* Формы */
 .admin-form {
     background: rgba(0, 0, 0, 0.2);
-    border-radius: 0.75rem;
-    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    padding: var(--card-padding);
 }
 
 .input-group {
@@ -109,6 +119,7 @@
     color: var(--primary);
     margin-bottom: 0.5rem;
     font-size: 0.9rem;
+    font-weight: 500;
 }
 
 .login-form {
@@ -119,33 +130,37 @@
 
 .login-attempts {
     text-align: center;
-    color: #8892a0;
+    color: var(--text-secondary);
     font-size: 0.9rem;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: calc(var(--border-radius) / 2);
 }
 
 .trade-input {
     width: 100%;
     padding: 0.75rem;
     background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(0, 255, 157, 0.2);
-    color: white;
-    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: calc(var(--border-radius) / 1.5);
     margin-bottom: 0.75rem;
     font-size: 0.9rem;
-    transition: all 0.3s ease;
+    transition: all var(--transition-speed) var(--transition-timing);
 }
 
 .trade-input:focus {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 2px rgba(0, 255, 157, 0.1);
+    box-shadow: 0 0 0 2px var(--primary-light);
 }
 
 textarea.trade-input {
     min-height: 200px;
-    font-family: monospace;
+    font-family: 'Consolas', 'Monaco', monospace;
     resize: vertical;
     line-height: 1.5;
+    tab-size: 4;
 }
 
 /* Группы элементов */
@@ -162,19 +177,28 @@ textarea.trade-input {
     margin-bottom: 1rem;
     padding: 0.75rem;
     background: rgba(0, 0, 0, 0.2);
-    border-radius: 0.5rem;
+    border-radius: calc(var(--border-radius) / 1.5);
 }
 
 .category-select label {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: white;
+    color: var(--text-primary);
     cursor: pointer;
+    padding: 0.5rem;
+    border-radius: calc(var(--border-radius) / 2);
+    transition: background var(--transition-speed) var(--transition-timing);
+}
+
+.category-select label:hover {
+    background: var(--primary-light);
 }
 
 .category-select input[type="radio"] {
     accent-color: var(--primary);
+    width: 16px;
+    height: 16px;
 }
 
 .button-group {
@@ -187,28 +211,32 @@ textarea.trade-input {
     width: 100%;
     padding: 0.75rem;
     background: var(--primary);
-    color: black;
+    color: var(--dark);
     border: none;
-    border-radius: 0.5rem;
+    border-radius: calc(var(--border-radius) / 1.5);
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-speed) var(--transition-timing);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
 .add-btn:hover {
     background: var(--primary-dark);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 255, 157, 0.2);
+    box-shadow: 0 4px 12px var(--primary-light);
 }
 
 .clear-btn {
     padding: 0.75rem;
     background: rgba(255, 68, 68, 0.1);
-    color: #ff4444;
+    color: var(--loss);
     border: 1px solid rgba(255, 68, 68, 0.2);
-    border-radius: 0.5rem;
+    border-radius: calc(var(--border-radius) / 1.5);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-speed) var(--transition-timing);
 }
 
 .clear-btn:hover {
@@ -220,10 +248,13 @@ textarea.trade-input {
     padding: 0.5rem;
     background: transparent;
     border: none;
-    color: #8892a0;
+    color: var(--text-secondary);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-speed) var(--transition-timing);
     font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
 }
 
 .help-btn:hover {
@@ -239,13 +270,13 @@ textarea.trade-input {
 
 .trade-item {
     background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(0, 255, 157, 0.2);
-    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: calc(var(--border-radius) / 1.5);
     padding: 1rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: all 0.3s ease;
+    transition: all var(--transition-speed) var(--transition-timing);
 }
 
 .trade-item:hover {
@@ -270,17 +301,21 @@ textarea.trade-input {
 
 .trade-date {
     font-size: 0.8rem;
-    color: #8892a0;
+    color: var(--text-secondary);
 }
 
 .delete-btn {
     padding: 0.5rem 1rem;
     background: rgba(255, 68, 68, 0.1);
-    color: #ff4444;
+    color: var(--loss);
     border: 1px solid rgba(255, 68, 68, 0.2);
-    border-radius: 0.5rem;
+    border-radius: calc(var(--border-radius) / 2);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-speed) var(--transition-timing);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
 }
 
 .delete-btn:hover {
@@ -293,10 +328,31 @@ textarea.trade-input {
     margin-bottom: 1rem;
     padding: 0.75rem;
     background: rgba(0, 0, 0, 0.2);
-    border-radius: 0.5rem;
+    border-radius: calc(var(--border-radius) / 1.5);
     font-size: 0.9rem;
-    color: #8892a0;
-    border: 1px solid rgba(0, 255, 157, 0.1);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Скроллбар */
+.admin-panel::-webkit-scrollbar {
+    width: 6px;
+}
+
+.admin-panel::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.admin-panel::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 157, 0.3);
+    border-radius: 3px;
+}
+
+.admin-panel::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 255, 157, 0.5);
 }
 
 /* Медиа запросы */
@@ -320,5 +376,23 @@ textarea.trade-input {
 
     .category-select {
         flex-direction: column;
+    }
+
+    .button-group {
+        flex-direction: column;
+    }
+}
+
+/* Поддержка тёмной темы */
+@media (prefers-color-scheme: dark) {
+    .admin-panel {
+        background: rgba(10, 15, 25, 0.98);
+    }
+}
+
+/* Поддержка Safari */
+@supports not (backdrop-filter: blur(10px)) {
+    .admin-panel {
+        background: rgba(15, 23, 42, 0.98);
     }
 }
