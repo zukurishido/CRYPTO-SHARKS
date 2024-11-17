@@ -1,3 +1,9 @@
+/* Конфигурация анимаций */
+:root {
+    --animation-duration: 0.5s;
+    --animation-timing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* Базовые анимации появления */
 @keyframes fadeIn {
     from {
@@ -43,7 +49,7 @@
     }
 }
 
-/* Анимация для прогресс-бара */
+/* Прогресс-бар анимации */
 @keyframes fillProgress {
     from {
         width: 0;
@@ -114,31 +120,44 @@
     }
 }
 
+/* Тряска для ошибок */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* Загрузка */
+@keyframes loading {
+    0% { opacity: 0.3; }
+    50% { opacity: 0.7; }
+    100% { opacity: 0.3; }
+}
+
 /* Применение анимаций */
 .fade-in {
-    animation: fadeIn 0.5s ease-out forwards;
+    animation: fadeIn var(--animation-duration) var(--animation-timing) forwards;
+    will-change: transform, opacity;
 }
 
 .fade-out {
-    animation: fadeOut 0.3s ease-out forwards;
+    animation: fadeOut 0.3s var(--animation-timing) forwards;
+    will-change: transform, opacity;
 }
 
 .slide-in-right {
-    animation: slideInRight 0.5s ease-out forwards;
+    animation: slideInRight var(--animation-duration) var(--animation-timing) forwards;
+    will-change: transform, opacity;
 }
 
 .slide-in-left {
-    animation: slideInLeft 0.5s ease-out forwards;
-}
-
-/* Анимация для заголовка */
-.title {
-    animation: textGlow 3s infinite;
+    animation: slideInLeft var(--animation-duration) var(--animation-timing) forwards;
+    will-change: transform, opacity;
 }
 
 /* Анимации для статистики */
 .stat-box {
-    animation: fadeIn 0.5s ease-out forwards;
+    animation: fadeIn var(--animation-duration) var(--animation-timing) forwards;
 }
 
 .stat-box:hover {
@@ -147,7 +166,7 @@
 
 /* Анимации для карточек */
 .trade-card {
-    animation: fadeIn 0.5s ease-out forwards;
+    animation: fadeIn var(--animation-duration) var(--animation-timing) forwards;
     animation-fill-mode: both;
 }
 
@@ -155,9 +174,9 @@
     animation: shine 2s linear infinite;
     background: linear-gradient(
         90deg,
-        rgba(255, 255, 255, 0) 0%,
-        rgba(255, 255, 255, 0.2) 50%,
-        rgba(255, 255, 255, 0) 100%
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
     );
     background-size: 200% 100%;
 }
@@ -186,73 +205,6 @@
     animation: shine 1.5s linear infinite;
 }
 
-/* Анимация уведомлений */
-.notification {
-    animation: slideInLeft 0.3s ease-out,
-               fadeOut 0.3s ease-out 2.7s forwards;
-}
-
-/* Задержки для каскадной анимации */
-.delay-1 { animation-delay: 0.1s; }
-.delay-2 { animation-delay: 0.2s; }
-.delay-3 { animation-delay: 0.3s; }
-.delay-4 { animation-delay: 0.4s; }
-.delay-5 { animation-delay: 0.5s; }
-
-/* Анимация для админ-панели */
-.admin-panel {
-    animation: slideInRight 0.3s ease-out;
-}
-
-/* Анимация удаления */
-.removing {
-    animation: fadeOut 0.3s ease-out forwards;
-}
-
-/* Эффект при наведении */
-.hover-glow:hover {
-    animation: glow 2s infinite;
-}
-
-/* Анимация обновления */
-.updating {
-    position: relative;
-    overflow: hidden;
-}
-
-.updating::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(0, 255, 157, 0.2),
-        transparent
-    );
-    animation: shine 1s linear;
-}
-
-/* Анимация для формы входа */
-.login-form {
-    animation: fadeIn 0.3s ease-out;
-}
-
-/* Анимация для подсказок */
-.help-tooltip {
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all 0.3s ease;
-}
-
-.help-tooltip.visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-
 /* Спиннер загрузки */
 .loading-spinner {
     width: 24px;
@@ -263,15 +215,59 @@
     animation: spin 1s linear infinite;
 }
 
-/* Анимация для ошибок валидации */
-.error-shake {
-    animation: shake 0.5s ease-in-out;
+/* Анимация уведомлений */
+.notification {
+    animation: slideInLeft 0.3s var(--animation-timing),
+               fadeOut 0.3s var(--animation-timing) 2.7s forwards;
 }
 
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    75% { transform: translateX(5px); }
+/* Каскадная анимация с задержкой */
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+.delay-5 { animation-delay: 0.5s; }
+
+/* Анимация для админ-панели */
+.admin-panel {
+    animation: slideInRight 0.3s var(--animation-timing);
+}
+
+/* Анимация удаления */
+.removing {
+    animation: fadeOut 0.3s var(--animation-timing) forwards;
+}
+
+/* Эффект свечения при наведении */
+.hover-glow:hover {
+    animation: glow 2s infinite;
+}
+
+/* Анимация обновления данных */
+.updating {
+    animation: loading 1.5s ease-in-out infinite;
+}
+
+/* Анимация для ошибок валидации */
+.error-shake {
+    animation: shake 0.5s var(--animation-timing);
+}
+
+/* Анимация для подсказок */
+.help-tooltip {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s var(--animation-timing);
+}
+
+.help-tooltip.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Плавное появление форм */
+.login-form {
+    animation: fadeIn 0.3s var(--animation-timing);
 }
 
 /* Оптимизация производительности */
@@ -285,3 +281,23 @@
         scroll-behavior: auto !important;
     }
 }
+
+/* Оптимизация для мобильных устройств */
+@media (max-width: 768px) {
+    :root {
+        --animation-duration: 0.3s;
+    }
+
+    .trade-card,
+    .stat-box {
+        animation-duration: 0.2s;
+    }
+}
+
+/* Поддержка высокопроизводительных анимаций */
+@supports (animation-timeline: scroll()) {
+    .scroll-animate {
+        animation-timeline: scroll();
+        animation-range: entry 25% cover 50%;
+    }
+    }
