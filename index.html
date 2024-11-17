@@ -3,43 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRYPTO SHARKS - Статистика</title>
+    <meta name="description" content="CRYPTO SHARKS - Статистика криптовалютного трейдинга">
+    <meta name="theme-color" content="#0f172a">
+    <title>CRYPTO SHARKS | Статистика трейдинга</title>
+    
+    <!-- Стили -->
     <link rel="stylesheet" href="main.css">
     <link rel="stylesheet" href="admin.css">
     <link rel="stylesheet" href="animations.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦈</text></svg>">
 </head>
 <body>
     <div class="container">
+        <!-- Шапка -->
         <header class="header">
             <h1 class="title">CRYPTO SHARKS</h1>
-            <button id="adminButton" class="admin-btn">Админ панель</button>
+            <button id="adminButton" class="admin-btn" aria-label="Открыть админ панель">
+                Админ панель
+            </button>
         </header>
 
-        <div id="filters" class="filters">
-            <!-- Фильтры добавляются динамически -->
-        </div>
+        <!-- Основной контент -->
+        <main>
+            <!-- Фильтры -->
+            <section id="filters" class="filters" aria-label="Фильтры">
+                <!-- Фильтры добавляются динамически -->
+            </section>
 
-        <div id="summaryStats" class="summary-stats">
-            <!-- Статистика добавляется динамически -->
-        </div>
+            <!-- Статистика -->
+            <section id="summaryStats" class="summary-stats" aria-label="Общая статистика">
+                <!-- Статистика добавляется динамически -->
+            </section>
 
-        <div id="statsContainer" class="stats-container">
-            <div id="tradesGrid" class="trades-grid">
-                <!-- Сделки добавляются динамически -->
+            <!-- Сделки -->
+            <section id="statsContainer" class="stats-container">
+                <div id="tradesGrid" class="trades-grid" aria-label="Список сделок">
+                    <!-- Сделки добавляются динамически -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Админ панель -->
+        <aside id="adminPanel" class="admin-panel" aria-hidden="true">
+            <div class="admin-header">
+                <h2>Админ панель</h2>
+                <button id="closeAdmin" class="close-btn" aria-label="Закрыть админ панель">✕</button>
             </div>
-        </div>
+            <div class="admin-form">
+                <!-- Форма админа добавляется динамически -->
+            </div>
+        </aside>
+
+        <!-- Уведомления -->
+        <div id="notifications" class="notifications" aria-live="polite"></div>
     </div>
 
-    <div id="adminPanel" class="admin-panel">
-        <div class="admin-header">
-            <h2>Админ панель</h2>
-            <button id="closeAdmin" class="close-btn">✕</button>
-        </div>
-        <div class="admin-form">
-            <!-- Форма админа добавляется динамически -->
-        </div>
-    </div>
-
+    <!-- Скрипты -->
     <script src="config.js"></script>
     <script src="data.js"></script>
     <script src="admin.js"></script>
