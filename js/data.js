@@ -1,309 +1,299 @@
-// Структура данных
-let data = {};
+// Локальное хранилище данных
+const DataStore = {
+    data: {},
+    version: '1.0.0',
+    lastUpdate: null,
+    
+    // Константы
+    YEARS: ['2023', '2024', '2025', '2026', '2027', '2028', '2029', '2030'],
+    MONTHS: [
+        'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+        'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+    ],
+    CATEGORIES: ['SPOT', 'FUTURES', 'DeFi']
+};
 
-// Константы для структуры данных
-const YEARS = ['2023', '2024', '2025', '2026', '2027', '2028', '2029', '2030'];
-const MONTHS = [
-    'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
-    'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
-];
-const CATEGORIES = ['SPOT', 'FUTURES', 'DeFi'];
+// Класс для работы с данными
+class DataManager {
+    constructor() {
+        this.store = DataStore;
+        this.isLoading = false;
+        this.initializeEventListeners();
+    }
 
-// Улучшенная загрузка данных
-async function loadData() {
-    try {
-        // Добавляем timestamp для предотвращения кэширования
-        const timestamp = new Date().getTime();
-        const response = await fetch(`${window.githubConfig.dataFile}?t=${timestamp}`);
+    // Загрузка данных
+    async loadData() {
+        if (this.isLoading) return false;
+        this.isLoading = true;
+
+        try {
+            // Добавляем timestamp для предотвращения кэширования
+            const timestamp = new Date().getTime();
+            const response = await fetch(`${window.githubConfig.dataFile}?t=${timestamp}`);
+            
+            if (!response.ok) throw new Error('Failed to fetch data');
+            
+            const loadedData = await response.json();
+            
+            // Валидация данных
+            if (!this.validateData(loadedData)) {
+                throw new Error('Invalid data structure');
+            }
+            
+            // Обновление хранилища
+            this.store.data = loadedData;
+            this.store.lastUpdate = timestamp;
+            
+            // Инициализация структуры
+            this.initializeDataStructure();
+            
+            // Кэширование
+            this.cacheData();
+            
+            return true;
+        } catch (error) {
+            console.error('Data loading error:', error);
+            return this.loadFromCache();
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    // Сохранение данных
+    async saveData() {
+        if (!window.configUtils.isAuthorized()) {
+            this.showError('Требуется авторизация');
+            return false;
+        }
+
+        try {
+            const token = window.configUtils.getToken();
+            if (!token) throw new Error('No token available');
+
+            // Получаем текущий SHA файла
+            const fileUrl = `https://api.github.com/repos/${window.githubConfig.owner}/${window.githubConfig.repo}/contents/${window.githubConfig.dataFile}`;
+            const fileResponse = await fetch(fileUrl, {
+                headers: { 'Authorization': `token ${token}` }
+            });
+            
+            if (!fileResponse.ok) throw new Error('Failed to get file info');
+            const fileInfo = await fileResponse.json();
+
+            // Подготовка данных
+            const content = btoa(JSON.stringify(this.store.data, null, 2));
+            
+            // Сохранение
+            const response = await fetch(fileUrl, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: 'Update trading data',
+                    content: content,
+                    sha: fileInfo.sha,
+                    branch: window.githubConfig.branch
+                })
+            });
+
+            if (!response.ok) throw new Error('Failed to save data');
+
+            // Обновление кэша
+            this.cacheData();
+            this.showSuccess('Данные сохранены');
+            
+            return true;
+        } catch (error) {
+            console.error('Save error:', error);
+            this.showError('Ошибка сохранения');
+            return false;
+        }
+    }
+
+    // Валидация данных
+    validateData(data) {
+        if (typeof data !== 'object' || data === null) return false;
         
-        if (!response.ok) throw new Error('Failed to fetch data');
-        
-        const loadedData = await response.json();
-        
-        // Проверка структуры данных
-        if (!isValidDataStructure(loadedData)) {
-            throw new Error('Invalid data structure');
+        for (const year of this.store.YEARS) {
+            if (!data[year]) return false;
+            
+            for (const month of this.store.MONTHS) {
+                if (!data[year][month]) return false;
+                
+                for (const category of this.store.CATEGORIES) {
+                    if (!data[year][month][category] || 
+                        !Array.isArray(data[year][month][category].trades)) {
+                        return false;
+                    }
+                }
+            }
         }
         
-        data = loadedData;
-        
-        // Инициализация структуры данных
-        YEARS.forEach(year => {
-            if (!data[year]) data[year] = {};
-            MONTHS.forEach(month => {
-                if (!data[year][month]) {
-                    data[year][month] = {};
-                    CATEGORIES.forEach(category => {
-                        if (!data[year][month][category]) {
-                            data[year][month][category] = { trades: [] };
+        return true;
+    }
+
+    // Инициализация структуры данных
+    initializeDataStructure() {
+        this.store.YEARS.forEach(year => {
+            if (!this.store.data[year]) this.store.data[year] = {};
+            
+            this.store.MONTHS.forEach(month => {
+                if (!this.store.data[year][month]) {
+                    this.store.data[year][month] = {};
+                    
+                    this.store.CATEGORIES.forEach(category => {
+                        if (!this.store.data[year][month][category]) {
+                            this.store.data[year][month][category] = { trades: [] };
                         }
                     });
                 }
             });
         });
+    }
 
-        // Кэширование данных
-        localStorage.setItem('cryptoSharksData', JSON.stringify(data));
-        localStorage.setItem('cryptoSharksLastUpdate', timestamp.toString());
-        
-        return true;
-    } catch (error) {
-        console.error('Error loading data:', error);
-        
-        // Попытка загрузить из кэша
-        const cachedData = localStorage.getItem('cryptoSharksData');
-        if (cachedData) {
-            try {
-                data = JSON.parse(cachedData);
-                return true;
-            } catch (e) {
-                console.error('Cache parsing error:', e);
+    // Кэширование данных
+    cacheData() {
+        try {
+            localStorage.setItem('cryptoSharksData', JSON.stringify({
+                data: this.store.data,
+                version: this.store.version,
+                timestamp: Date.now()
+            }));
+        } catch (error) {
+            console.error('Cache error:', error);
+        }
+    }
+
+    // Загрузка из кэша
+    loadFromCache() {
+        try {
+            const cached = localStorage.getItem('cryptoSharksData');
+            if (!cached) return false;
+
+            const { data, version, timestamp } = JSON.parse(cached);
+            
+            // Проверяем версию и актуальность
+            if (version !== this.store.version || 
+                Date.now() - timestamp > 24 * 60 * 60 * 1000) {
+                return false;
             }
+
+            this.store.data = data;
+            return true;
+        } catch {
+            return false;
         }
-        return false;
-    }
-}
-
-// Улучшенное сохранение данных
-async function saveData() {
-    if (!window.isAuthenticated) {
-        showNotification('Требуется авторизация', 'error');
-        return false;
     }
 
-    try {
-        // Получаем текущий SHA файла
-        const fileUrl = `https://api.github.com/repos/${window.githubConfig.owner}/${window.githubConfig.repo}/contents/${window.githubConfig.dataFile}`;
-        const fileResponse = await fetch(fileUrl, {
-            headers: {
-                'Authorization': `token ${window.githubConfig.token}`
-            }
-        });
-        
-        if (!fileResponse.ok) throw new Error('Failed to get file info');
-        
-        const fileInfo = await fileResponse.json();
-
-        // Подготовка данных
-        const content = btoa(JSON.stringify(data, null, 2));
-        
-        // Сохранение на GitHub
-        const response = await fetch(fileUrl, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `token ${window.githubConfig.token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                message: 'Update trading data',
-                content: content,
-                sha: fileInfo.sha,
-                branch: window.githubConfig.branch
-            })
-        });
-
-        if (!response.ok) throw new Error('Failed to save data');
-
-        // Обновление локального кэша
-        localStorage.setItem('cryptoSharksData', JSON.stringify(data));
-        localStorage.setItem('cryptoSharksLastUpdate', new Date().getTime().toString());
-        
-        showNotification('Данные успешно сохранены', 'success');
-        return true;
-    } catch (error) {
-        console.error('Save error:', error);
-        showNotification('Ошибка сохранения', 'error');
-        return false;
-    }
-}
-
-// Проверка структуры данных
-function isValidDataStructure(data) {
-    if (typeof data !== 'object' || data === null) return false;
-    
-    return true; // Базовая проверка, можно расширить при необходимости
-}
-
-// Парсер сделок с улучшенной валидацией
-function parseTrades(text) {
-    const lines = text.split('\n').filter(line => line.trim());
-    let currentCategory = '';
-    let trades = [];
-    
-    lines.forEach(line => {
-        // Очистка строки
-        const cleanLine = line.trim().replace(/["""'']/g, '');
-
-        // Определение категории
-        if (cleanLine.match(/DEFI|ДЕФИ|DEFI:|ДЕФИ:|DEFI🚀|DEF|DEPOSIT|ДЕФИ СПОТЫ?/i)) {
-            currentCategory = 'DeFi';
-            return;
-        } else if (cleanLine.match(/FUTURES|ФЬЮЧЕРС|FUTURES:|ФЬЮЧЕРС:|FUTURES🚀|FUT|PERPETUAL|ФЬЮЧЕРСЫ?/i)) {
-            currentCategory = 'FUTURES';
-            return;
-        } else if (cleanLine.match(/SPOT|СПОТ|SPOT:|СПОТ:|SPOT🚀|DEPOSIT|SPOT TRADING|СПОТ ТОРГОВЛЯ/i)) {
-            currentCategory = 'SPOT';
-            return;
-        }
-
-        // Паттерны для разбора строк
-        const patterns = [
-            /[#]?(\w+)\s*([-+])\s*(\d+\.?\d*)%\s*(?:\((\d+)x\)?)?/i,
-            /(?:\d+[\.)]\s*)[#]?(\w+)\s*([-+])\s*(\d+\.?\d*)%\s*(?:\((\d+)x\)?)?/i,
-            /(\w+)\s*[-\.]\s*([-+])\s*(\d+\.?\d*)%\s*(?:\((\d+)x\)?)?/i,
-            /(\w+)([-+])(\d+\.?\d*)%\s*(?:\((\d+)x\)?)?/i,
-            /(\w+)\s+(\d+\.?\d*)%/i
-        ];
-
-        for (const pattern of patterns) {
-            const match = cleanLine.match(pattern);
-            if (match && currentCategory) {
-                const [_, symbol, sign, value, leverage] = match;
-                let result = parseFloat(value);
-                
-                if (sign === '-' || cleanLine.includes('-')) {
-                    result = -result;
-                }
-                
-                const cleanSymbol = symbol.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
-                
-                trades.push({
-                    id: Date.now() + Math.random(),
-                    pair: cleanSymbol,
-                    result: result,
-                    leverage: leverage || '',
-                    status: result > 0 ? 'profit' : 'loss',
-                    category: currentCategory,
-                    timestamp: new Date().toISOString()
-                });
-                break;
-            }
-        }
-    });
-
-    return trades;
-}
-
-// Добавление сделок
-async function addTradeData(year, month, category, trades) {
-    if (!window.isAuthenticated) {
-        showNotification('Требуется авторизация', 'error');
-        return false;
+    // Получение данных за период
+    getPeriodData(year, month, category) {
+        return this.store.data[year]?.[month]?.[category]?.trades || [];
     }
 
-    try {
-        if (!data[year]) data[year] = {};
-        if (!data[year][month]) data[year][month] = {};
-        if (!data[year][month][category]) data[year][month][category] = { trades: [] };
-
-        if (Array.isArray(trades)) {
-            data[year][month][category].trades.push(...trades);
-        } else {
-            data[year][month][category].trades.push(trades);
-        }
-        
-        const success = await saveData();
-        if (success) {
-            showNotification('Сделки успешно добавлены', 'success');
-        }
-        return success;
-    } catch (error) {
-        console.error('Error adding trades:', error);
-        showNotification('Ошибка добавления сделок', 'error');
-        return false;
-    }
-}
-
-// Получение данных за период
-function getPeriodData(year, month, category) {
-    return data[year]?.[month]?.[category]?.trades || [];
-}
-
-// Улучшенное удаление сделки
-async function deleteTradeData(year, month, category, index) {
-    if (!window.isAuthenticated) {
-        showNotification('Требуется авторизация', 'error');
-        return false;
-    }
-
-    try {
-        if (!data[year] || !data[year][month] || !data[year][month][category]) {
+    // Добавление сделок
+    async addTrades(year, month, category, trades) {
+        if (!window.configUtils.isAuthorized()) {
+            this.showError('Требуется авторизация');
             return false;
         }
 
-        const trades = data[year][month][category].trades;
-        if (index >= 0 && index < trades.length) {
-            trades.splice(index, 1);
-            const success = await saveData();
+        try {
+            if (!this.store.data[year]) this.store.data[year] = {};
+            if (!this.store.data[year][month]) this.store.data[year][month] = {};
+            if (!this.store.data[year][month][category]) {
+                this.store.data[year][month][category] = { trades: [] };
+            }
+
+            const tradesArray = Array.isArray(trades) ? trades : [trades];
+            
+            // Проверка лимитов
+            if (!window.configUtils.checkLimits('maxBulkTrades', tradesArray.length)) {
+                throw new Error('Превышен лимит на количество сделок');
+            }
+
+            // Добавление timestamp и ID
+            tradesArray.forEach(trade => {
+                trade.id = Date.now() + Math.random();
+                trade.timestamp = new Date().toISOString();
+            });
+
+            this.store.data[year][month][category].trades.push(...tradesArray);
+            
+            const success = await this.saveData();
             if (success) {
-                showNotification('Сделка удалена', 'success');
+                this.showSuccess(`Добавлено ${tradesArray.length} сделок`);
             }
             return success;
+        } catch (error) {
+            console.error('Error adding trades:', error);
+            this.showError(error.message);
+            return false;
         }
-        
-        return false;
-    } catch (error) {
-        console.error('Error deleting trade:', error);
-        showNotification('Ошибка удаления', 'error');
-        return false;
     }
-}
 
-// Расчет статистики с дополнительными метриками
-function calculateStats(trades) {
-    try {
-        let totalProfit = 0;
-        let totalLoss = 0;
-        let profitCount = 0;
-        let lossCount = 0;
-        let maxProfit = 0;
-        let maxLoss = 0;
-        let avgProfit = 0;
-        let avgLoss = 0;
-        
-        trades.forEach(trade => {
-            if (trade.result > 0) {
-                totalProfit += trade.result;
-                profitCount++;
-                maxProfit = Math.max(maxProfit, trade.result);
-            } else if (trade.result < 0) {
-                totalLoss += Math.abs(trade.result);
-                lossCount++;
-                maxLoss = Math.max(maxLoss, Math.abs(trade.result));
+    // Удаление сделки
+    async deleteTrade(year, month, category, index) {
+        if (!window.configUtils.isAuthorized()) {
+            this.showError('Требуется авторизация');
+            return false;
+        }
+
+        try {
+            if (!this.store.data[year]?.[month]?.[category]?.trades) {
+                return false;
+            }
+
+            const trades = this.store.data[year][month][category].trades;
+            if (index >= 0 && index < trades.length) {
+                trades.splice(index, 1);
+                const success = await this.saveData();
+                if (success) {
+                    this.showSuccess('Сделка удалена');
+                }
+                return success;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error deleting trade:', error);
+            this.showError('Ошибка удаления');
+            return false;
+        }
+    }
+
+    // Уведомления
+    showSuccess(message) {
+        window.showNotification?.(message, 'success');
+    }
+
+    showError(message) {
+        window.showNotification?.(message, 'error');
+    }
+
+    // Обработчики событий
+    initializeEventListeners() {
+        // Автоматическое обновление
+        setInterval(() => {
+            if (!document.hidden) {
+                this.loadData();
+            }
+        }, window.githubConfig.refreshInterval);
+
+        // Обновление при возвращении на вкладку
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                this.loadData();
             }
         });
-
-        if (profitCount > 0) avgProfit = totalProfit / profitCount;
-        if (lossCount > 0) avgLoss = totalLoss / lossCount;
-
-        return {
-            totalTrades: trades.length,
-            profitTrades: profitCount,
-            lossTrades: lossCount,
-            totalProfit: totalProfit.toFixed(1),
-            totalLoss: totalLoss.toFixed(1),
-            winRate: trades.length > 0 ? ((profitCount / trades.length) * 100).toFixed(1) : 0,
-            maxProfit: maxProfit.toFixed(1),
-            maxLoss: maxLoss.toFixed(1),
-            avgProfit: avgProfit.toFixed(1),
-            avgLoss: avgLoss.toFixed(1)
-        };
-    } catch (error) {
-        console.error('Error calculating stats:', error);
-        return {
-            totalTrades: 0,
-            profitTrades: 0,
-            lossTrades: 0,
-            totalProfit: '0.0',
-            totalLoss: '0.0',
-            winRate: '0.0',
-            maxProfit: '0.0',
-            maxLoss: '0.0',
-            avgProfit: '0.0',
-            avgLoss: '0.0'
-        };
     }
 }
 
-// Автоматическое обновление
-setInterval(loadData, 30000);
+// Создаем экземпляр менеджера данных
+window.dataManager = new DataManager();
+
+// Экспортируем методы для обратной совместимости
+window.loadData = () => window.dataManager.loadData();
+window.saveData = () => window.dataManager.saveData();
+window.getPeriodData = (y, m, c) => window.dataManager.getPeriodData(y, m, c);
+window.addTradeData = (y, m, c, t) => window.dataManager.addTrades(y, m, c, t);
+window.deleteTradeData = (y, m, c, i) => window.dataManager.deleteTrade(y, m, c, i);
